@@ -1,0 +1,104 @@
+from flask import Flask, jsonify, request
+import pyodbc
+
+app = Flask(__name__)
+
+# Конфигурация подключения к базе данных
+SERVER = '192.168.0.1\\SQLEXPRESS'  # Адрес сервера SQL Server
+DATABASE = 'warehouse'  # Имя базы данных
+USER = 'flask_user'  # Имя пользователя
+PASSWORD = 'elich3258'  # Пароль
+
+# Функция для подключения к базе данных
+def get_db_connection():
+    conn = pyodbc.connect(
+        r'DRIVER={ODBC Driver 17 for SQL Server};'  # Используем драйвер ODBC для подключения
+        r'SERVER=localhost\SQLEXPRESS;'  # Адрес SQL Server
+        r'DATABASE=warehouse;'  # Имя базы данных
+        r'UID=flask_user;'  # Логин
+        r'PWD=elich3258;'  # Пароль
+    )
+    return conn
+
+# Главная страница
+@app.route('/')
+def index():
+    try:
+        connection = get_db_connection()  # Подключаемся к базе данных
+        connection.close()  # Закрываем соединениеФ
+        return "Successfully connected to the SQL Server database."  # Возвращаем сообщение о успешном подключении
+    except Exception as e:
+        return f"Error: {str(e)}"  # В случае ошибки выводим сообщение об ошибке
+
+# Получить все товары
+@app.route('/products')
+def get_products():
+    try:
+        connection = get_db_connection()  # Подключаемся к базе данных
+        cursor = connection.cursor()  # Создаём курсор для выполнения SQL-запросов
+        cursor.execute("SELECT * FROM products")  # Выполняем запрос на получение всех товаров
+        result = cursor.fetchall()  # Извлекаем все результаты запроса
+        connection.close()  # Закрываем соединение
+        return jsonify(result)  # Возвращаем результаты в формате JSON
+    except Exception as e:
+        return f"Error: {str(e)}"  # В случае ошибки выводим сообщение об ошибке
+
+# Обновить товар
+@app.route('/update_product/<int:product_id>', methods=['PUT'])
+def update_product(product_id):
+    try:
+        connection = get_db_connection()  # Подключаемся к базе данных
+        cursor = connection.cursor()  # Создаём курсор для выполнения SQL-запросов
+        cursor.execute("""
+            UPDATE products
+            SET name = ?, quantity = ?, location = ?
+            WHERE id = ?
+        """, ('Updated Product', 150, 'USA', product_id))  # Выполняем запрос на обновление товара
+        connection.commit()  # Подтверждаем изменения в базе данных
+        connection.close()  # Закрываем соединение
+        return f"Product with ID {product_id} successfully updated."  # Возвращаем сообщение об успешном обновлении товара
+    except Exception as e:
+        return f"Error: {str(e)}"  # В случае ошибки выводим сообщение об ошибке
+
+# Удалить товар
+@app.route('/delete_product/<int:product_id>', methods=['DELETE'])
+def delete_product(product_id):
+    try:
+        connection = get_db_connection()  # Подключаемся к базе данных
+        cursor = connection.cursor()  # Создаём курсор для выполнения SQL-запросов
+        cursor.execute("DELETE FROM products WHERE id = ?", (product_id,))  # Выполняем запрос на удаление товара
+        connection.commit()  # Подтверждаем изменения в базе данных
+        connection.close()  # Закрываем соединение
+        return f"Product with ID {product_id} successfully deleted."  # Возвращаем сообщение об успешном удалении товара
+    except Exception as e:
+        return f"Error: {str(e)}"  # В случае ошибки выводим сообщение об ошибке
+
+# Добавить товар
+@app.route('/add_product', methods=['POST'])
+def add_product():
+    try:
+        # Получаем данные из запроса (в формате JSON)
+        name = request.json['name']
+        quantity = request.json['quantity']
+        location = request.json['location']
+
+        # Проверка, что обязательные поля присутствуют
+        if not name or not location:
+            return "Name and Location are required.", 400
+        if not isinstance(quantity, int) or quantity <= 0:
+            return "Quantity must be a positive integer.", 400
+
+        # Подключаемся к базе данных и добавляем товар
+        connection = get_db_connection()
+        cursor = connection.cursor()
+        cursor.execute("INSERT INTO products (name, quantity, location) VALUES (?, ?, ?)", (name, quantity, location))
+        connection.commit()  # Подтверждаем изменения в базе данных
+        connection.close()  # Закрываем соединение
+
+        return "Product successfully added.", 201  # Возвращаем сообщение об успешном добавлении товара
+    except Exception as e:
+        return f"Error: {str(e)}", 500  # В случае ошибки выводим сообщение об ошибке
+
+# Запуск приложения
+if __name__ == '__main__':
+    app.run(debug=True)

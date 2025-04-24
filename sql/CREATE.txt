@@ -1,0 +1,71 @@
+-- 1. Пользователи
+CREATE TABLE Users (
+    user_id INT IDENTITY(1,1) PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(100) NOT NULL,
+    role VARCHAR(20) DEFAULT 'user'
+);
+
+-- 2. Категории товаров
+CREATE TABLE Categories (
+    category_id INT IDENTITY(1,1) PRIMARY KEY,
+    category_name VARCHAR(50) NOT NULL,
+    description TEXT
+);
+
+-- 3. Товары
+CREATE TABLE Items (
+    item_id INT IDENTITY(1,1) PRIMARY KEY,
+    item_name VARCHAR(100) NOT NULL,
+    category_id INT,
+    price DECIMAL(10, 2),
+    FOREIGN KEY (category_id) REFERENCES Categories(category_id)
+);
+
+-- 4. Поставщики
+CREATE TABLE Suppliers (
+    supplier_id INT IDENTITY(1,1) PRIMARY KEY,
+    supplier_name VARCHAR(100) NOT NULL,
+    contact_info VARCHAR(100)
+);
+
+-- 5. Поставки
+CREATE TABLE Purchases (
+    purchase_id INT IDENTITY(1,1) PRIMARY KEY,
+    item_id INT,
+    supplier_id INT,
+    purchase_date DATE NOT NULL,
+    quantity INT,
+    total_cost DECIMAL(10, 2),
+    FOREIGN KEY (item_id) REFERENCES Items(item_id),
+    FOREIGN KEY (supplier_id) REFERENCES Suppliers(supplier_id)
+);
+
+-- 6. Ячейки склада
+CREATE TABLE Locations (
+    location_id INT IDENTITY(1,1) PRIMARY KEY,
+    location_name VARCHAR(50) NOT NULL UNIQUE,
+    is_occupied BIT DEFAULT 0
+);
+
+-- 7. Размещение товаров по ячейкам
+CREATE TABLE Item_Locations (
+    item_location_id INT IDENTITY(1,1) PRIMARY KEY,
+    item_id INT,
+    location_id INT,
+    quantity INT NOT NULL,
+    FOREIGN KEY (item_id) REFERENCES Items(item_id),
+    FOREIGN KEY (location_id) REFERENCES Locations(location_id)
+);
+
+-- 8. Журнал операций
+CREATE TABLE Inventory_Transactions (
+    transaction_id INT IDENTITY(1,1) PRIMARY KEY,
+    item_id INT,
+    transaction_type VARCHAR(20), -- 'add', 'remove'
+    transaction_date DATETIME DEFAULT GETDATE(),
+    quantity INT,
+    location_id INT,
+    FOREIGN KEY (item_id) REFERENCES Items(item_id),
+    FOREIGN KEY (location_id) REFERENCES Locations(location_id)
+);

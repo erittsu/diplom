@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Складской учёт</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #444; }
+        .section { margin-bottom: 30px; }
+        label, input, select, button { display: block; margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <h1>Складской учёт</h1>
+
+    <div class="section">
+        <h2>Добавить товар</h2>
+        <form id="addItemForm">
+            <label>Название:</label>
+            <input type="text" name="item_name" required>
+
+            <label>Категория:</label>
+            <select name="category_id" id="categorySelect"></select>
+
+            <label>Цена:</label>
+            <input type="number" name="price" step="0.01" required>
+
+            <label>Количество:</label>
+            <input type="number" name="quantity" required>
+
+            <button type="submit">Добавить</button>
+        </form>
+        <div id="result"></div>
+    </div>
+
+    <div class="section">
+        <h2>Размещение товаров</h2>
+        <button onclick="loadLocations()">Обновить</button>
+        <ul id="locationsList"></ul>
+    </div>
+
+    <script>
+        // Загрузка категорий при загрузке страницы
+        window.onload = function() {
+            fetch('/categories')
+                .then(response => response.json())
+                .then(data => {
+                    const select = document.getElementById('categorySelect');
+                    data.forEach(cat => {
+                        const option = document.createElement('option');
+                        option.value = cat.category_id;
+                        option.text = cat.category_name;
+                        select.appendChild(option);
+                    });
+                });
+
+            loadLocations();
+        };
+
+        // Обработчик добавления товара
+        document.getElementById('addItemForm').onsubmit = function(e) {
+            e.preventDefault();
+            const form = e.target;
+            const data = {
+                item_name: form.item_name.value,
+                category_id: form.category_id.value,
+                price: parseFloat(form.price.value),
+                quantity: parseInt(form.quantity.value)
+            };
+
+            fetch('/add_item', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.text())
+            .then(msg => {
+                document.getElementById('result').innerText = msg;
+                loadLocations();
+                form.reset();
+            });
+        };
+
+        // Загрузка размещения товаров
+        function loadLocations() {
+            fetch('/item_locations')
+                .then(response => response.json())
+                .then(data => {
+                    const list = document.getElementById('locationsList');
+                    list.innerHTML = '';
+                    data.forEach(entry => {
+                        const li = document.createElement('li');
+                        li.innerText = `${entry.item_name} — ${entry.quantity} шт. на ${entry.location_name}`;
+                        list.appendChild(li);
+                    });
+                });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,2 @@
+# сброс счётчика IDENTITY 
+DBCC CHECKIDENT ('Таблица', RESEED, 0);
