@@ -6,8 +6,8 @@
 CREATE TABLE Users (
     user_id INT IDENTITY(1,1) PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
-    password VARCHAR(100) NOT NULL,
-    role VARCHAR(20) DEFAULT 'user' -- user, admin
+    password VARCHAR(255) NOT NULL, -- хранит захешированный пароль
+    role VARCHAR(20) NOT NULL CHECK (role IN ('supplier', 'staff', 'manager'))
 );
 -- Используется для авторизации и логирования действий
 
