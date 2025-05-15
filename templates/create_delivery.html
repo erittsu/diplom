@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить новую поставку | Складской учет</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --success-color: #4CAF50;
+            --info-color: #2196F3;
+            --danger-color: #dc3545;
+            --background-color: #f8f9fa;
+            --card-color: #ffffff;
+            --text-color: #333333;
+            --border-color: #dee2e6;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .page-header h2 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .form-card {
+            background-color: var(--card-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            font-size: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            outline: 0;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25);
+        }
+        
+        .item-card {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--info-color);
+        }
+        
+        .item-card h4 {
+            color: var(--info-color);
+            margin-bottom: 15px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            color: #fff;
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        
+        .btn-success {
+            color: #fff;
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+        
+        .btn-success:hover {
+            background-color: #45a049;
+            border-color: #45a049;
+        }
+        
+        .btn-info {
+            color: #fff;
+            background-color: var(--info-color);
+            border-color: var(--info-color);
+        }
+        
+        .btn-info:hover {
+            background-color: #0b7dda;
+            border-color: #0b7dda;
+        }
+        
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+        
+        .note {
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 10px;
+            font-style: italic;
+        }
+        
+        .divider {
+            height: 1px;
+            background-color: var(--border-color);
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .form-card {
+                padding: 15px;
+            }
+            
+            .btn {
+                padding: 8px 15px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h2>Добавить новую поставку</h2>
+            <p>Заполните форму для создания новой поставки товаров</p>
+        </div>
+        
+        <div class="form-card">
+            <form method="POST" action="/create_delivery" onsubmit="prepareDeliveryData()">
+                <div class="form-group">
+                    <label for="delivery_date">Дата поставки</label>
+                    <input type="date" class="form-control" id="delivery_date" name="delivery_date" required>
+                </div>
+                
+                <div id="items_container">
+                    <!-- Товары будут добавляться сюда -->
+                </div>
+                
+                <button type="button" class="btn btn-info btn-block" onclick="addItemRow()">
+                    + Добавить товар
+                </button>
+                
+                <div class="divider"></div>
+                
+                <!-- Скрытое поле для хранения списка товаров в формате JSON -->
+                <input type="hidden" id="delivery_items" name="delivery_items" required>
+                <input type="hidden" name="created_by" value="{{ user_id }}">
+                
+                <button type="submit" class="btn btn-success btn-block">
+                    Создать поставку
+                </button>
+                
+                <p class="note">Все добавленные товары будут автоматически собраны в формате JSON перед отправкой формы.</p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let itemIndex = 0; // Индекс для товаров
+        const items = [];  // Массив для хранения товаров
+
+        // Функция для добавления нового товара
+        function addItemRow() {
+            itemIndex++;
+            const container = document.getElementById('items_container');
+
+            const itemRow = document.createElement('div');
+            itemRow.classList.add('item-card');
+            itemRow.innerHTML = `
+                <h4>Товар ${itemIndex}</h4>
+                <div class="form-group">
+                    <label>Название товара</label>
+                    <input type="text" class="form-control" name="item_name_${itemIndex}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Артикул</label>
+                    <input type="text" class="form-control" name="article_code_${itemIndex}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Цена (руб)</label>
+                    <input type="number" class="form-control" name="price_${itemIndex}" step="0.01" min="0" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Вес (кг)</label>
+                    <input type="number" class="form-control" name="weight_${itemIndex}" step="0.01" min="0" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Размеры (Д×Ш×В)</label>
+                    <input type="text" class="form-control" name="size_${itemIndex}" placeholder="Например: 30×40×50" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Тип товара</label>
+                    <select class="form-control" name="type_${itemIndex}" required>
+                        <option value="хрупкий">Хрупкий</option>
+                        <option value="жидкий">Жидкий</option>
+                        <option value="крупногабаритный">Крупногабаритный</option>
+                    </select>
+                </div>
+            `;
+
+            container.appendChild(itemRow);
+            
+            // Прокрутка к добавленному товару
+            itemRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Функция для подготовки данных товара в формате JSON перед отправкой формы
+        function prepareDeliveryData() {
+            const formElements = document.querySelectorAll('input, select');
+            items.length = 0; // Очищаем старые данные
+
+            for (let i = 1; i <= itemIndex; i++) {
+                const item = {
+                    item_name: document.querySelector(`input[name="item_name_${i}"]`).value,
+                    article_code: document.querySelector(`input[name="article_code_${i}"]`).value,
+                    price: parseFloat(document.querySelector(`input[name="price_${i}"]`).value),
+                    weight: parseFloat(document.querySelector(`input[name="weight_${i}"]`).value),
+                    size: document.querySelector(`input[name="size_${i}"]`).value,
+                    type: document.querySelector(`select[name="type_${i}"]`).value
+                };
+
+                items.push(item);
+            }
+
+            // Заполняем скрытое поле JSON
+            document.getElementById('delivery_items').value = JSON.stringify(items);
+        }
+
+        window.onload = () => {
+            addItemRow(); // Добавляем первый товар по умолчанию
+            
+            // Установка текущей даты по умолчанию
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('delivery_date').value = today;
+        };
+    </script>
+</body>
+</html>

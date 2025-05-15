@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Детали поставки #{{ delivery.delivery_id }} | Складской учет</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --background-color: #f5f7fa;
+            --card-color: #ffffff;
+            --text-color: #333333;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: var(--card-color);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .breadcrumb {
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+        
+        .breadcrumb a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .delivery-header {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .delivery-meta {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 15px;
+        }
+        
+        .meta-item strong {
+            display: inline-block;
+            width: 100px;
+            color: #666;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .status-pending { background-color: #fff3cd; color: #856404; }
+        .status-received { background-color: #d4edda; color: #155724; }
+        .status-cancelled { background-color: #f8d7da; color: #721c24; }
+        
+        .action-btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .cancel-btn {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        .cancel-btn:hover {
+            background-color: #c82333;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: var(--card-color);
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Хлебные крошки -->
+        <div class="breadcrumb">
+            <a href="{{ url_for('supplier_panel') }}">Главная</a> / 
+            <span>Поставка #{{ delivery.delivery_id }}</span>
+        </div>
+
+        <div class="delivery-header">
+            <h1>Поставка #{{ delivery.delivery_id }}</h1>
+            
+            <div class="delivery-meta">
+                <div class="meta-item">
+                    <strong>Дата:</strong> {{ delivery.delivery_date }}
+                </div>
+                <div class="meta-item">
+                    <strong>Статус:</strong>
+                    <span class="status-badge status-{{ delivery.status }}">
+                        {{ delivery.status }}
+                    </span>
+                </div>
+            </div>
+            
+            {% if can_cancel %}
+                <form action="{{ url_for('supplier_cancel_delivery', delivery_id=delivery.delivery_id) }}" method="POST">
+                    <button type="submit" class="action-btn cancel-btn">Отменить поставку</button>
+                </form>
+            {% endif %}
+        </div>
+
+        <h2>Товары в поставке</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Название</th>
+                    <th>Артикул</th>
+                    <th>Цена</th>
+                    <th>Вес (кг)</th>
+                    <th>Размер</th>
+                    <th>Тип</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.item_name }}</td>
+                    <td>{{ item.article_code }}</td>
+                    <td>{{ item.price }} ₽</td>
+                    <td>{{ item.weight }} кг</td>
+                    <td>{{ item.size }}</td>
+                    <td>{{ item.type }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

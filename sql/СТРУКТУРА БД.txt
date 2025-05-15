@@ -105,3 +105,9 @@ CREATE TABLE Inventory_Transactions (
 -- Item_Locations      - связь товара с ячейкой
 -- Outbound_Deliveries - отгрузка куда-либо, JSON-список отгружаемых товаров (валидный JSON)
 -- Inventory_Transactions - логирование всех действий пользователей
+
+ALTER TABLE Suppliers
+ADD user_id INT UNIQUE;
+
+ALTER TABLE Suppliers
+ADD CONSTRAINT FK_Suppliers_Users FOREIGN KEY (user_id) REFERENCES Users(user_id);

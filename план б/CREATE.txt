@@ -1,4 +1,4 @@
--- 1. Пользователи
+-- 1. РџРѕР»СЊР·РѕРІР°С‚РµР»Рё
 CREATE TABLE Users (
     user_id INT IDENTITY(1,1) PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
@@ -6,30 +6,21 @@ CREATE TABLE Users (
     role VARCHAR(20) DEFAULT 'user'
 );
 
--- 2. Категории товаров
-CREATE TABLE Categories (
-    category_id INT IDENTITY(1,1) PRIMARY KEY,
-    category_name VARCHAR(50) NOT NULL,
-    description TEXT
-);
-
--- 3. Товары
+-- 3. РўРѕРІР°СЂС‹
 CREATE TABLE Items (
     item_id INT IDENTITY(1,1) PRIMARY KEY,
     item_name VARCHAR(100) NOT NULL,
-    category_id INT,
-    price DECIMAL(10, 2),
-    FOREIGN KEY (category_id) REFERENCES Categories(category_id)
+    price DECIMAL(10, 2)
 );
 
--- 4. Поставщики
+-- 4. РџРѕСЃС‚Р°РІС‰РёРєРё
 CREATE TABLE Suppliers (
     supplier_id INT IDENTITY(1,1) PRIMARY KEY,
     supplier_name VARCHAR(100) NOT NULL,
     contact_info VARCHAR(100)
 );
 
--- 5. Поставки
+-- 5. РџРѕСЃС‚Р°РІРєРё
 CREATE TABLE Purchases (
     purchase_id INT IDENTITY(1,1) PRIMARY KEY,
     item_id INT,
@@ -41,14 +32,14 @@ CREATE TABLE Purchases (
     FOREIGN KEY (supplier_id) REFERENCES Suppliers(supplier_id)
 );
 
--- 6. Ячейки склада
+-- 6. РЇС‡РµР№РєРё СЃРєР»Р°РґР°
 CREATE TABLE Locations (
     location_id INT IDENTITY(1,1) PRIMARY KEY,
     location_name VARCHAR(50) NOT NULL UNIQUE,
     is_occupied BIT DEFAULT 0
 );
 
--- 7. Размещение товаров по ячейкам
+-- 7. Р Р°Р·РјРµС‰РµРЅРёРµ С‚РѕРІР°СЂРѕРІ РїРѕ СЏС‡РµР№РєР°Рј
 CREATE TABLE Item_Locations (
     item_location_id INT IDENTITY(1,1) PRIMARY KEY,
     item_id INT,
@@ -58,7 +49,7 @@ CREATE TABLE Item_Locations (
     FOREIGN KEY (location_id) REFERENCES Locations(location_id)
 );
 
--- 8. Журнал операций
+-- 8. Р–СѓСЂРЅР°Р» РѕРїРµСЂР°С†РёР№
 CREATE TABLE Inventory_Transactions (
     transaction_id INT IDENTITY(1,1) PRIMARY KEY,
     item_id INT,

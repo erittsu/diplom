@@ -1,21 +1,124 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>Регистрация</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация | Складской учет</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --background-color: #f5f7fa;
+            --card-color: #ffffff;
+            --text-color: #333333;
+            --error-color: #e74c3c;
+        }
+        
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .register-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 2rem;
+            background: var(--card-color);
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            color: #777;
+        }
+    </style>
 </head>
 <body>
-    <h2>Регистрация пользователя</h2>
-    <form method="POST" action="/register">
-        <label>Логин:</label><br>
-        <input type="text" name="username" required><br>
-        <label>Пароль:</label><br>
-        <input type="password" name="password" required><br>
-        <label>Роль:</label><br>
-        <select name="role">
-            <option value="user">Сотрудник</option>
-            <option value="supplier">Поставщик</option>
-        </select><br><br>
-        <button type="submit">Создать</button>
-    </form>
+    <div class="register-container">
+        <h2>Регистрация нового пользователя</h2>
+        
+        <form method="POST" action="/register">
+            <div class="form-group">
+                <label for="username">Логин</label>
+                <input type="text" id="username" name="username" required placeholder="Введите логин">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <input type="password" id="password" name="password" required placeholder="Введите пароль">
+            </div>
+            
+            <div class="form-group">
+                <label for="role">Роль пользователя</label>
+                <select id="role" name="role" required>
+                    <option value="staff">Сотрудник склада</option>
+                    <option value="supplier">Поставщик</option>
+                </select>
+            </div>
+            
+            <button type="submit">Зарегистрировать</button>
+        </form>
+        
+        <div class="footer">
+            <p>Доступно только для администраторов системы</p>
+        </div>
+    </div>
 </body>
 </html>
