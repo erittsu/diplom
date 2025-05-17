@@ -1,0 +1,479 @@
+/* ==================== */
+/* ОСНОВНАЯ СТРУКТУРА  */
+/* ==================== */
+
+/* Контейнеры и общие стили */
+.staff-container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 20px auto;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 70px);
+}
+
+.staff-content {
+    background-color: var(--card-color);
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border: 1px solid var(--input-border);
+    width: 100%;
+    flex: 1;
+    margin: 15px auto 0;
+}
+
+/* Секции контента */
+.staff-section {
+    background: var(--card-color);
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    padding: 25px;
+    margin-bottom: 30px;
+}
+
+.staff-section h2 {
+    margin: 0 0 20px 0;
+    color: var(--primary-color);
+    font-size: 1.5rem;
+}
+
+
+/* ==================== */
+/* КОМПОНЕНТЫ ИНТЕРФЕЙСА */
+/* ==================== */
+
+/* 1. НАВИГАЦИЯ */
+.staff-navbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 12px 20px;
+    background-color: var(--card-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid var(--input-border);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.staff-navbar::-webkit-scrollbar {
+    display: none;
+}
+
+.nav-btn {
+    padding: 10px 18px;
+    border-radius: 6px;
+    background-color: transparent;
+    color: var(--text-color);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    font-weight: 500;
+    font-size: 0.95rem;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.nav-btn:hover {
+    background-color: rgba(var(--primary-color-rgb), 0.08);
+    border-color: rgba(var(--primary-color-rgb), 0.2);
+}
+
+.nav-btn.active {
+    background-color: rgba(var(--primary-color-rgb), 0.12);
+    border-color: rgba(var(--primary-color-rgb), 0.3);
+    color: var(--primary-color);
+}
+
+/* Меню пользователя */
+.user-menu {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding-left: 20px;
+    border-left: 1px solid var(--input-border);
+}
+
+.username-display {
+    font-weight: 500;
+    color: var(--text-color);
+    margin-right: 10px;
+}
+
+.logout-btn {
+    background: none;
+    border: none;
+    color: var(--error-color);
+    cursor: pointer;
+    font-size: 0.95rem;
+    padding: 8px 12px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+    background-color: rgba(var(--error-color-rgb), 0.08);
+}
+
+
+/* 2. ТАБЛИЦЫ */
+.staff-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 0.95rem;
+}
+
+.staff-table thead th {
+    background-color: rgba(0, 0, 0, 0.03);
+    color: var(--text-color);
+    font-weight: 600;
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 2px solid var(--input-border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.staff-table tbody tr {
+    transition: background-color 0.2s;
+}
+
+.staff-table tbody tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.staff-table tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.staff-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--input-border);
+    vertical-align: middle;
+    color: var(--text-color);
+}
+
+/* Кнопки в таблицах */
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+/* Фильтры таблиц */
+.filter-group {
+    background: var(--card-color);
+    border-radius: 8px;
+    padding: 4px;
+    border: 1px solid var(--input-border);
+    display: inline-flex;
+}
+
+.filter-btn {
+    border: 1px solid var(--input-border);
+    color: var(--text-color);
+    font-weight: 500;
+    padding: 6px 12px;
+    margin: 0 2px;
+    transition: all 0.2s;
+    background-color: transparent;
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+.filter-btn:hover {
+    background-color: rgba(var(--primary-color-rgb), 0.05);
+    border-color: var(--primary-color);
+}
+
+.filter-btn.active {
+    background-color: rgba(var(--primary-color-rgb), 0.1);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+/* Кнопки действий в таблицах */
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    padding: 0;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    background-color: transparent;
+}
+
+.view-btn {
+    color: var(--info-color);
+    border-color: rgba(var(--info-color-rgb), 0.3);
+}
+
+.view-btn:hover {
+    background-color: rgba(var(--info-color-rgb), 0.1);
+}
+
+.edit-btn {
+    color: var(--warning-color);
+    border-color: rgba(var(--warning-color-rgb), 0.3);
+}
+
+.edit-btn:hover {
+    background-color: rgba(var(--warning-color-rgb), 0.1);
+}
+
+.delete-btn {
+    color: var(--error-color);
+    border-color: rgba(var(--error-color-rgb), 0.3);
+}
+
+.delete-btn:hover {
+    background-color: rgba(var(--error-color-rgb), 0.1);
+}
+
+.accept-btn {
+    color: var(--success-color);
+    border-color: rgba(var(--success-color-rgb), 0.3);
+}
+
+.accept-btn:hover {
+    background-color: rgba(var(--success-color-rgb), 0.1);
+}
+
+
+/* 3. КАРТОЧКИ И МЕТРИКИ (DASHBOARD) */
+.welcome-section {
+    margin-bottom: 2rem;
+}
+
+.welcome-section h2 {
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+}
+
+.welcome-section p {
+    color: var(--placeholder-color);
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 25px;
+}
+
+.metric-card {
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    background-color: var(--card-color);
+    border: 1px solid var(--input-border);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+}
+
+.metric-inner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+}
+
+.metric-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+}
+
+.metric-info h3 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.metric-info p {
+    margin: 4px 0 0;
+    font-size: 0.95rem;
+    color: var(--placeholder-color);
+}
+
+.metric-link {
+    display: inline-block;
+    margin-top: 8px;
+    color: var(--primary-color);
+    font-weight: 500;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s ease;
+}
+
+/* Цвета иконок метрик */
+.bg-primary .metric-icon {
+    background-color: rgba(var(--primary-color-rgb), 0.1);
+    color: var(--primary-color);
+}
+
+.bg-success .metric-icon {
+    background-color: rgba(var(--success-color-rgb), 0.1);
+    color: var(--success-color);
+}
+
+.bg-info .metric-icon {
+    background-color: rgba(var(--info-color-rgb), 0.1);
+    color: var(--info-color);
+}
+
+.bg-warning .metric-icon {
+    background-color: rgba(var(--warning-color-rgb), 0.1);
+    color: var(--warning-color);
+}
+
+/* Карточка активности */
+.card {
+    background-color: var(--card-color);
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    border: 1px solid var(--input-border);
+}
+
+.card-header {
+    margin-bottom: 15px;
+}
+
+.card-title {
+    font-size: 1.3rem;
+    color: var(--primary-color);
+}
+
+.activity-list {
+    list-style: none;
+    padding: 0;
+}
+
+.activity-item {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--input-border);
+    display: flex;
+    gap: 15px;
+}
+
+.activity-time {
+    color: var(--placeholder-color);
+    min-width: 80px;
+}
+
+.activity-text {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-color);
+}
+
+
+/* 4. СТАТУС-БЕЙДЖИ */
+.status-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.status-pending { background-color: rgba(255, 193, 7, 0.2); color: var(--warning-color); }
+.status-received { background-color: rgba(40, 167, 69, 0.2); color: var(--success-color); }
+.status-cancelled { background-color: rgba(220, 53, 69, 0.2); color: var(--error-color); }
+.status-preparing { background-color: rgba(108, 117, 125, 0.2); color: var(--secondary-color); }
+.status-shipped { background-color: rgba(23, 162, 184, 0.2); color: var(--info-color); }
+.status-returned { background-color: rgba(220, 53, 69, 0.2); color: var(--error-color); }
+
+
+/* ==================== */
+/* АДАПТИВНОСТЬ */
+/* ==================== */
+
+@media (max-width: 1200px) {
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .staff-container {
+        padding: 0 15px;
+    }
+    
+    .staff-content {
+        padding: 15px;
+    }
+    
+    .staff-navbar {
+        padding: 10px;
+    }
+    
+    .nav-btn {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .staff-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .filter-group {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .filter-btn {
+        padding: 5px 8px;
+        font-size: 0.8rem;
+        margin: 2px;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .action-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 0.8rem;
+    }
+}

@@ -1,0 +1,72 @@
+{% extends "staff/staff_panel.html" %}
+
+{% block staff_content %}
+<div class="staff-section">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Возвратные поставки</h2>
+        <div class="btn-group filter-group">
+            <a href="{{ url_for('staff.staff_outbound') }}"
+               class="btn btn-sm filter-btn {% if not status_filter %}active{% endif %}">
+                Все
+            </a>
+            <a href="{{ url_for('staff.staff_outbound') }}?status=preparing"
+               class="btn btn-sm filter-btn {% if status_filter == 'preparing' %}active{% endif %}">
+                В ожидании
+            </a>
+            <a href="{{ url_for('staff.staff_outbound') }}?status=shipped"
+               class="btn btn-sm filter-btn {% if status_filter == 'shipped' %}active{% endif %}">
+                Отправленные
+            </a>
+            <a href="{{ url_for('staff.staff_outbound') }}?status=returned"
+               class="btn btn-sm filter-btn {% if status_filter == 'returned' %}active{% endif %}">
+                Возвраты
+            </a>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="staff-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Адрес</th>
+                    <th>Дата</th>
+                    <th>Товаров</th>
+                    <th>Статус</th>
+                    <th class="text-center">Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for outbound in outbounds %}
+                <tr>
+                    <td>{{ outbound.outbound_id }}</td>
+                    <td>{{ outbound.destination_address }}</td>
+                    <td>{{ outbound.delivery_date }}</td>
+                    <td>{{ outbound.items_count }}</td>
+                    <td>
+                        <span class="status-badge status-{{ outbound.status }}">
+                            {% if outbound.status == 'preparing' %}Подготовка
+                            {% elif outbound.status == 'shipped' %}Отправлено
+                            {% elif outbound.status == 'returned' %}Возврат
+                            {% else %}{{ outbound.status }}{% endif %}
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        <div class="action-buttons">
+                            <a href="#" class="btn btn-sm action-btn view-btn" title="Детали">
+                                <i class="far fa-eye"></i>
+                            </a>
+                            {% if outbound.status == 'preparing' %}
+                            <button class="btn btn-sm action-btn ship-btn" title="Отправить">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Кабинет поставщика | Складской учет{% endblock %}
+
+{% block container_class %}<div class="panel-container">{% endblock %}
+
+{% block content %}
+    <div class="panel-header">
+        <div>
+            <h1>Кабинет поставщика</h1>
+            <p>Управление вашими поставками</p>
+        </div>
+        <div class="panel-actions">
+            <a href="{{ url_for('supplier.create_delivery') }}" class="btn">Добавить поставку</a>
+            <form action="{{ url_for('logout') }}" method="POST">
+                <button type="submit" class="btn btn-logout">Выйти</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="filter-card">
+        <form method="GET" action="{{ url_for('supplier.supplier_panel') }}">
+            <div class="filter-form">
+                <div class="filter-group">
+                    <label for="status_filter">Статус:</label>
+                    <select id="status_filter" name="status_filter" onchange="this.form.submit()">
+                        <option value="all" {% if request.args.get('status_filter') == 'all' %}selected{% endif %}>Все</option>
+                        <option value="pending" {% if request.args.get('status_filter') == 'pending' %}selected{% endif %}>Ожидание</option>
+                        <option value="received" {% if request.args.get('status_filter') == 'received' %}selected{% endif %}>Принято</option>
+                        <option value="cancelled" {% if request.args.get('status_filter') == 'cancelled' %}selected{% endif %}>Отменено</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="start_date">С:</label>
+                    <input type="date" id="start_date" name="start_date" value="{{ request.args.get('start_date') }}">
+                </div>
+                
+                <div class="filter-group">
+                    <label for="end_date">По:</label>
+                    <input type="date" id="end_date" name="end_date" value="{{ request.args.get('end_date') }}">
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn">Применить</button>
+                    <a href="{{ url_for('supplier.supplier_panel') }}" class="btn btn-secondary">Сбросить</a>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <h2>Ваши поставки</h2>
+    {% if deliveries %}
+        <div class="table-container">
+            <table class="deliveries-table">
+                <thead>
+                    <tr>
+                        <th>ID поставки</th>
+                        <th>Дата</th>
+                        <th>Статус</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for delivery in deliveries %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('supplier.delivery_details', delivery_id=delivery.delivery_id) }}" class="delivery-link">
+                                {{ delivery.delivery_id }}
+                            </a>
+                        </td>
+                        <td>{{ delivery.delivery_date }}</td>
+                        <td>
+                            <span class="status-badge status-{{ delivery.status }}">
+                                {{ delivery.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <p>У вас пока нет поставок.</p>
+            <a href="{{ url_for('supplier.create_delivery') }}" class="btn">Создать первую поставку</a>
+        </div>
+    {% endif %}
+{% endblock %}

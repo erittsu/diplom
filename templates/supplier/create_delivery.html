@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Добавить новую поставку | Складской учет{% endblock %}
+
+{% block container_class %}<div class="form-container">{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>Добавить новую поставку</h1>
+        <p>Заполните форму для создания новой поставки товаров</p>
+    </div>
+    
+    <form method="POST" action="{{ url_for('supplier.create_delivery') }}" onsubmit="prepareDeliveryData()">
+        <div class="form-group">
+            <label for="delivery_date">Дата поставки</label>
+            <input type="date" id="delivery_date" name="delivery_date" required>
+        </div>
+        
+        <div id="items_container">
+            <!-- Товары будут добавляться сюда -->
+        </div>
+        
+        <button type="button" class="btn btn-info" onclick="addItemRow()">
+            <i class="fas fa-plus"></i> Добавить товар
+        </button>
+        
+        <div class="form-divider"></div>
+        
+        <input type="hidden" id="delivery_items" name="delivery_items" required>
+        <input type="hidden" name="created_by" value="{{ user_id }}">
+        
+        <button type="submit" class="btn btn-success">Создать поставку</button>
+    </form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let itemIndex = 0;
+
+    function addItemRow() {
+        itemIndex++;
+        const container = document.getElementById('items_container');
+
+        const itemRow = document.createElement('div');
+        itemRow.classList.add('item-card');
+        itemRow.innerHTML = `
+            <h3>Товар ${itemIndex}</h3>
+            <div class="form-group">
+                <label>Название товара</label>
+                <input type="text" name="item_name_${itemIndex}" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Артикул</label>
+                <input type="text" name="article_code_${itemIndex}" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Цена (руб)</label>
+                <input type="number" name="price_${itemIndex}" step="0.01" min="0" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Вес (кг)</label>
+                <input type="number" name="weight_${itemIndex}" step="0.01" min="0" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Размеры (Д×Ш×В)</label>
+                <input type="text" name="size_${itemIndex}" placeholder="Например: 30×40×50" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Тип товара</label>
+                <select name="type_${itemIndex}" required>
+                    <option value="хрупкий">Хрупкий</option>
+                    <option value="жидкий">Жидкий</option>
+                    <option value="крупногабаритный">Крупногабаритный</option>
+                </select>
+            </div>
+        `;
+
+        container.appendChild(itemRow);
+        itemRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function prepareDeliveryData() {
+        const items = [];
+        for (let i = 1; i <= itemIndex; i++) {
+            const item = {
+                item_name: document.querySelector(`input[name="item_name_${i}"]`).value,
+                article_code: document.querySelector(`input[name="article_code_${i}"]`).value,
+                price: parseFloat(document.querySelector(`input[name="price_${i}"]`).value),
+                weight: parseFloat(document.querySelector(`input[name="weight_${i}"]`).value),
+                size: document.querySelector(`input[name="size_${i}"]`).value,
+                type: document.querySelector(`select[name="type_${i}"]`).value
+            };
+            items.push(item);
+        }
+        document.getElementById('delivery_items').value = JSON.stringify(items);
+    }
+
+    window.onload = () => {
+        addItemRow();
+        document.getElementById('delivery_date').value = new Date().toISOString().split('T')[0];
+    };
+</script>
+{% endblock %}

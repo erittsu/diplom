@@ -7,7 +7,7 @@ CREATE TABLE Users (
     user_id INT IDENTITY(1,1) PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL, -- хранит захешированный пароль
-    role VARCHAR(20) NOT NULL CHECK (role IN ('supplier', 'staff', 'manager'))
+    role VARCHAR(20) NOT NULL CHECK (role IN ('supplier', 'staff', 'admin'))
 );
 -- Используется для авторизации и логирования действий
 
@@ -16,7 +16,8 @@ CREATE TABLE Suppliers (
     supplier_id INT IDENTITY(1,1) PRIMARY KEY,
     supplier_name VARCHAR(100) NOT NULL,
     contact_info VARCHAR(100),
-    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'suspended'))
+    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'suspended')),
+    supplier_login VARCHAR(50) NOT NULL
 );
 -- Хранит информацию о поставщиках
 
@@ -42,9 +43,7 @@ CREATE TABLE Items (
     weight DECIMAL(10,2),
     size VARCHAR(50), -- пример: "30x30x40"
     item_type VARCHAR(30) CHECK (item_type IN ('хрупкий', 'жидкий', 'крупногабаритный')),
-    status VARCHAR(20) DEFAULT 'accepted' CHECK (status IN ('accepted', 'shipped')),
-    created_by INT NOT NULL,
-    FOREIGN KEY (created_by) REFERENCES Users(user_id)
+    status VARCHAR(20) DEFAULT 'accepted' CHECK (status IN ('accepted', 'shipped'))
 );
 -- Каждая единица товара — отдельная запись
 
@@ -106,8 +105,80 @@ CREATE TABLE Inventory_Transactions (
 -- Outbound_Deliveries - отгрузка куда-либо, JSON-список отгружаемых товаров (валидный JSON)
 -- Inventory_Transactions - логирование всех действий пользователей
 
-ALTER TABLE Suppliers
-ADD user_id INT UNIQUE;
 
-ALTER TABLE Suppliers
-ADD CONSTRAINT FK_Suppliers_Users FOREIGN KEY (user_id) REFERENCES Users(user_id);
+ALTER TABLE Items ADD created_date DATETIME DEFAULT GETDATE();
+
+-- Триггер для освобождения ячеек при удалении товара
+CREATE TRIGGER trg_after_item_delete
+ON Items
+AFTER DELETE
+AS
+BEGIN
+    DELETE FROM Item_Locations
+    WHERE item_id IN (SELECT item_id FROM deleted)
+    
+    INSERT INTO Inventory_Transactions (user_id, item_id, transaction_type)
+    SELECT 1, item_id, 'item_deleted' FROM deleted  -- user_id 1 = система
+END;
+
+-- 1. Добавляем тип ячейки в таблицу Locations
+ALTER TABLE Locations ADD location_type VARCHAR(30) 
+CHECK (location_type IN ('хрупкий', 'жидкий', 'крупногабаритный', 'обычный'));
+
+-- 2. Добавляем ограничения на размещение товаров
+ALTER TABLE Item_Locations ADD CONSTRAINT FK_Item_Locations_Compatible 
+FOREIGN KEY (location_id) REFERENCES Locations(location_id);
+
+
+
+-- 3. Создаем триггер для проверки совместимости товара и ячейки
+CREATE TRIGGER trg_check_item_location_compatibility
+ON Item_Locations
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM inserted i
+        JOIN Items it ON i.item_id = it.item_id
+        JOIN Locations loc ON i.location_id = loc.location_id
+        WHERE loc.location_type != 'обычный' 
+          AND loc.location_type != it.item_type
+    )
+    BEGIN
+        RAISERROR('Несовместимость типа товара и ячейки', 16, 1);
+        ROLLBACK TRANSACTION;
+    END
+END;
+
+
+
+-- 4. Создаем ячейки разных типов (пример)
+INSERT INTO Locations (location_name, location_type) VALUES
+-- Для хрупких товаров
+('A-01', 'хрупкий'), ('A-02', 'хрупкий'), ('A-03', 'хрупкий'),
+-- Для жидких товаров
+('B-01', 'жидкий'), ('B-02', 'жидкий'), ('B-03', 'жидкий'),
+-- Для крупногабаритных товаров
+('C-01', 'крупногабаритный'), ('C-02', 'крупногабаритный'),
+-- Обычные ячейки
+('D-01', 'обычный'), ('D-02', 'обычный'), ('D-03', 'обычный');
+
+-- Представление для свободных ячеек:
+CREATE VIEW Available_Locations AS
+SELECT l.location_id, l.location_name, l.location_type
+FROM Locations l
+LEFT JOIN Item_Locations il ON l.location_id = il.location_id
+WHERE il.item_id IS NULL;
+
+-- Представление для занятых ячеек:
+CREATE VIEW Occupied_Locations AS
+SELECT 
+    l.location_id, 
+    l.location_name, 
+    l.location_type,
+    i.item_id,
+    i.item_name,
+    i.item_type
+FROM Locations l
+JOIN Item_Locations il ON l.location_id = il.location_id
+JOIN Items i ON il.item_id = i.item_id;

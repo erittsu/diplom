@@ -1,4 +1,9 @@
+/* ==================== */
+/* ОСНОВНЫЕ ПЕРЕМЕННЫЕ И НАСТРОЙКИ */
+/* ==================== */
+
 :root {
+    /* Цветовая схема */
     --primary-color: #3498db;
     --secondary-color: #2980b9;
     --background-color: #f5f7fa;
@@ -12,8 +17,21 @@
     --footer-color: #777;
     --gradient-start: #f5f7fa;
     --gradient-end: #e4e8eb;
+    --success-color: #28a745;
+    --info-color: #17a2b8;
+    --warning-color: #ffc107;
+    
+    /* RGB значения */
+    --primary-color-rgb: 52, 152, 219;
+    --success-color-rgb: 40, 167, 69;
+    --info-color-rgb: 23, 162, 184;
+    --warning-color-rgb: 255, 193, 7;
+    --error-color-rgb: 220, 53, 69;
+    --secondary-color-rgb: 108, 117, 125;
 }
+
 [data-theme="dark"] {
+    /* Темная тема */
     --primary-color: #4a9ff5;
     --secondary-color: #3a8bd6;
     --background-color: #1a1a1a;
@@ -26,9 +44,11 @@
     --placeholder-color: #aaa;
     --footer-color: #aaa;
     --gradient-start: #1a1a1a;
-    --gradient-end: #1a1a1a; 
+    --gradient-end: #1a1a1a;
+    --primary-color-rgb: 74, 159, 245;
 }
 
+/* Базовые стили */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -36,26 +56,36 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+html, body {
+    height: 100%;
+    overflow-x: hidden;
+}
+
 body {
     background-color: var(--background-color);
     color: var(--text-color);
     display: flex;
-    justify-content: center;
-    align-items: center;
+    flex-direction: column;
     min-height: 100vh;
     background-image: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
     transition: background-color 0.3s, color 0.3s;
 }
 
+
+/* ==================== */
+/* КОМПОНЕНТЫ ИНТЕРФЕЙСА */
+/* ==================== */
+
+/* 1. ШАПКА САЙТА */
 .header {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    height: 60px;
+    height: 50px;
     background-color: var(--header-bg);
     display: flex;
-    justify-content: space-between; /* Это ключевое свойство */
+    justify-content: space-between;
     align-items: center;
     padding: 0 20px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -89,62 +119,69 @@ body {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
-.theme-toggle i {
-    font-size: 1.2rem;
-}
 
+/* 2. ОСНОВНОЙ КОНТЕНТ */
 .main-content {
-    margin-top: 80px;
+    margin-top: 50px;
     padding: 20px;
-    width: 100%;
+    flex: 1;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
+    width: 100%;
 }
 
-.login-container {
+/* Общие стили контейнеров */
+.login-container,
+.register-container,
+.panel-container,
+.form-container {
+    margin-top: 20px;
     width: 100%;
-    max-width: 400px;
+    max-width: 1200px;
     padding: 2rem;
     background: var(--card-color);
     border-radius: 10px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     animation: fadeIn 0.5s ease-in-out;
+    margin: 0 auto;
+    box-sizing: border-box;
+    max-height: calc(100vh - 140px);
+    overflow-y: auto;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+/* Специфичные стили для админ-панели */
+.admin-panel .panel-container {
+    margin-top: 20px;
+    width: 100%;
+    max-width: 1200px;
+    padding: 1.5rem;
+    background: var(--card-color);
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.5s ease-in-out;
+    margin: 0 auto 30px;
+    box-sizing: border-box;
+    overflow-y: visible;
 }
 
-.logo {
-    text-align: center;
-    margin-bottom: 1.5rem;
-}
 
-.logo h1 {
-    color: var(--primary-color);
-    font-size: 1.8rem;
-    margin-bottom: 0.5rem;
-}
-
-.logo p {
-    color: var(--placeholder-color);
-    font-size: 0.9rem;
-}
-
+/* 3. ФОРМЫ И ЭЛЕМЕНТЫ УПРАВЛЕНИЯ */
 .form-group {
     margin-bottom: 1.5rem;
+    position: relative;
 }
 
-label {
+.form-group label {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 600;
     color: var(--placeholder-color);
 }
 
-input {
+input,
+select,
+textarea {
     width: 100%;
     padding: 12px 15px;
     border: 1px solid var(--input-border);
@@ -155,7 +192,9 @@ input {
     color: var(--text-color);
 }
 
-input:focus {
+input:focus,
+select:focus,
+textarea:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
@@ -165,44 +204,361 @@ input::placeholder {
     color: var(--placeholder-color);
 }
 
-button {
-    width: 100%;
-    padding: 12px;
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
+/* Кнопки */
+button,
+.btn {
+    padding: 12px 20px;
     border-radius: 5px;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.3s;
+    text-align: center;
+    display: inline-block;
+    border: none;
 }
 
-button:hover {
-    background-color: var(--secondary-color);
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    box-shadow: 0 4px 6px rgba(52, 152, 219, 0.2);
 }
 
-.register-btn {
-    background-color: transparent;
+.btn-outline {
+    background: transparent;
     color: var(--primary-color);
-    border: 1px solid var(--primary-color);
-    margin-top: 1rem;
+    border: 2px solid var(--primary-color);
 }
 
-.register-btn:hover {
-    background-color: rgba(52, 152, 219, 0.1);
+.btn-outline:hover {
+    background: rgba(52, 152, 219, 0.1);
+}
+
+.btn-logout {
+    background-color: var(--error-color);
+}
+
+.btn-logout:hover {
+    background-color: #c0392b;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+.btn-success {
+    background-color: var(--success-color);
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+.btn-info {
+    background-color: var(--info-color);
+}
+
+.btn-info:hover {
+    background-color: #138496;
+}
+
+.btn-warning {
+    background-color: var(--warning-color);
+    color: #212529;
+}
+
+.btn-warning:hover {
+    background-color: #e0a800;
+}
+
+
+/* 4. ТАБЛИЦЫ */
+.table-container {
+    overflow-x: auto;
+    margin-top: 20px;
+}
+
+.deliveries-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--card-color);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.deliveries-table th,
+.deliveries-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--input-border);
+}
+
+.deliveries-table th {
+    background-color: rgba(0, 0, 0, 0.05);
+    font-weight: 600;
+    color: var(--placeholder-color);
+}
+
+.delivery-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.delivery-link:hover {
+    text-decoration: underline;
+}
+
+
+/* 5. КАРТОЧКИ И БЛОКИ */
+.item-card {
+    background-color: rgba(0, 0, 0, 0.03);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-left: 4px solid var(--primary-color);
+}
+
+.item-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+.filter-card {
+    background-color: rgba(0, 0, 0, 0.03);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: flex-end;
+}
+
+.filter-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.form-divider {
+    height: 1px;
+    background-color: var(--input-border);
+    margin: 25px 0;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    background-color: rgba(0, 0, 0, 0.03);
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.empty-state p {
+    margin-bottom: 20px;
+    color: var(--placeholder-color);
+}
+
+
+/* 6. СТАТУСЫ И УВЕДОМЛЕНИЯ */
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-pending { background-color: #fff3cd; color: #856404; }
+.status-received { background-color: #d4edda; color: #155724; }
+.status-cancelled { background-color: #f8d7da; color: #721c24; }
+
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+
+/* 7. ЗАГОЛОВКИ И ТЕКСТ */
+.logo h1,
+.page-header h1,
+.page-header h2 {
+    color: var(--primary-color);
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.logo p,
+.page-header p {
+    color: var(--placeholder-color);
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+
+/* 8. ПАНЕЛИ И ХЕДЕРЫ */
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.panel-actions {
+    display: flex;
+    gap: 15px;
+}
+
+
+/* ==================== */
+/* СПЕЦИФИЧНЫЕ СТРАНИЦЫ */
+/* ==================== */
+
+/* 1. СТРАНИЦА ВХОДА */
+.login-container {
+    width: 100%;
+    max-width: 420px;
+    padding: 1.5rem;
+    background: var(--card-color);
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.6s ease-out;
+    margin: 20px auto 0;
+}
+
+.logo h1 {
+    background: linear-gradient(135deg, var(--primary-color), #2c3e50);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.login-form button[type="submit"] {
+    width: 100%;
+    padding: 14px;
+    font-size: 1.1rem;
+    letter-spacing: 0.5px;
+    margin-top: 0.5rem;
+}
+
+.register-box {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 8px;
+    border: 1px solid var(--input-border);
+    text-align: center;
 }
 
 .footer {
-    text-align: center;
     margin-top: 2rem;
-    font-size: 0.8rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--input-border);
+    font-size: 0.85rem;
     color: var(--footer-color);
+    text-align: center;
+}
+
+
+/* ==================== */
+/* АНИМАЦИИ И ЭФФЕКТЫ */
+/* ==================== */
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+/* ==================== */
+/* АДАПТИВНОСТЬ */
+/* ==================== */
+
+@media (max-width: 768px) {
+    .header {
+        height: 45px;
+    }
+    
+    .main-content {
+        margin-top: 45px;
+        min-height: calc(100vh - 45px);
+        padding: 5px 10px;
+    }
+
+    .login-container,
+    .register-container,
+    .panel-container,
+    .form-container {
+        margin-top: 10px;
+        padding: 1rem;
+    }
+    
+    .panel-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .panel-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+    
+    .filter-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-group {
+        min-width: 100%;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    button,
+    .btn {
+        width: 100%;
+    }
 }
 
 @media (max-width: 480px) {
     .login-container {
         padding: 1.5rem;
         margin: 1rem;
+    }
+}
+
+/* Фикс для Firefox */
+@-moz-document url-prefix() {
+    .main-content {
+        min-height: 0;
+        height: auto;
     }
 }

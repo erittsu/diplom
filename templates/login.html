@@ -9,11 +9,11 @@
 </head>
 <body>
     <header class="header">
-    <div class="header-title">Складской учет</div>
-    <button class="theme-toggle">
-        <i class="fas fa-moon"></i> Тема
-    </button>
-</header>
+        <div class="header-title">Складской учет</div>
+        <button class="theme-toggle">
+            <i class="fas fa-moon"></i> Тема
+        </button>
+    </header>
 
     <main class="main-content">
         <div class="login-container">
@@ -22,7 +22,7 @@
                 <p>Система автоматизированного управления складом</p>
             </div>
             
-            <form method="POST" action="/login">
+            <form method="POST" action="/login" class="login-form">
                 <div class="form-group">
                     <label for="username">Логин</label>
                     <input type="text" id="username" name="username" required placeholder="Введите ваш логин">
@@ -33,12 +33,15 @@
                     <input type="password" id="password" name="password" required placeholder="Введите ваш пароль">
                 </div>
                 
-                <button type="submit">Войти</button>
+                <button type="submit" class="btn btn-primary">Войти</button>
             </form>
             
-            <form method="GET" action="/register">
-                <button type="submit" class="register-btn">Регистрация (только для админа)</button>
-            </form>
+            <div class="register-box">
+                <p>Нет аккаунта? Только для администраторов:</p>
+                <form method="GET" action="/register">
+                    <button type="submit" class="btn btn-outline">Регистрация</button>
+                </form>
+            </div>
             
             <div class="footer">
                 <p>&copy; 2025 Складской учет. Все права защищены.</p>
@@ -47,6 +50,5 @@
     </main>
 
     <script src="..\static\theme.js"></script>
-
 </body>
 </html>

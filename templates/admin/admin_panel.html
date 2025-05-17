@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block body_class %}admin-panel{% endblock %}
+
+{% block title %}Админ-панель | Складской учет{% endblock %}
+
+{% block container_class %}<div class="panel-container">{% endblock %}
+
+{% block content %}
+    <header>
+        <div class="user-welcome">
+            Добро пожаловать, <strong>{{ username }}</strong> (Администратор)
+        </div>
+        <form action="{{ url_for('logout') }}" method="POST" class="logout-form">
+            <button type="submit" class="logout-btn">Выйти</button>
+        </form>
+    </header>
+    
+    <div class="dashboard">
+        <div class="card">
+            <h3>Управление поставками</h3>
+            <div class="stats">{{ total_deliveries }}</div>
+            <p>Всего зарегистрированных поставок в системе</p>
+            <a href="{{ url_for('admin.admin_deliveries') }}" class="btn btn-block">Перейти к поставкам</a>
+        </div>
+        
+        <div class="card">
+            <h3>Управление пользователями</h3>
+            <div class="stats">{{ active_users }}</div>
+            <p>Активных пользователей в системе</p>
+            <a href="{{ url_for('register') }}" class="btn btn-block">Управление пользователями</a>
+        </div>
+        
+        <div class="card">
+            <h3>Статистика склада</h3>
+            <p>Просмотр аналитики и отчетов по работе склада</p>
+            <a href="#" class="btn btn-block">Открыть статистику</a>
+        </div>
+    </div>
+    
+    <div class="quick-actions">
+        <h3>Быстрые действия</h3>
+        <div class="action-list">
+            <div class="action-item">
+                <a href="{{ url_for('register') }}">Добавить нового пользователя</a>
+            </div>
+            <div class="action-item">
+                <a href="{{ url_for('admin.admin_deliveries') }}">Проверить ожидающие поставки</a>
+            </div>
+            <div class="action-item">
+                <a href="#">Сгенерировать отчет</a>
+            </div>
+            <div class="action-item">
+                <a href="#">Настройки системы</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+    .user-welcome {
+        font-size: 18px;
+    }
+    
+    .user-welcome strong {
+        color: var(--primary-color);
+    }
+    
+    .logout-form {
+        display: inline;
+    }
+    
+    .logout-btn {
+        padding: 8px 16px;
+        background-color: var(--danger-color);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background-color 0.2s;
+    }
+    
+    .logout-btn:hover {
+        background-color: #c82333;
+    }
+    
+    .dashboard {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
+        margin-top: 20px;
+    }
+    
+    .card {
+        background-color: var(--card-color);
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        padding: 25px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .card h3 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        color: var(--primary-color);
+        font-size: 20px;
+    }
+    
+    .card p {
+        color: var(--placeholder-color);
+        margin-bottom: 20px;
+    }
+    
+    .card .stats {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    
+    .btn {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: var(--primary-color);
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: 500;
+        transition: background-color 0.2s;
+    }
+    
+    .btn:hover {
+        background-color: var(--secondary-color);
+        color: white;
+    }
+    
+    .btn-block {
+        display: block;
+        text-align: center;
+    }
+    
+    .quick-actions {
+        margin-top: 30px;
+    }
+    
+    .quick-actions h3 {
+        margin-bottom: 15px;
+        color: var(--placeholder-color);
+    }
+    
+    .action-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+    
+    .action-item {
+        background-color: var(--card-color);
+        padding: 15px;
+        border-radius: 6px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    .action-item a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .action-item a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}

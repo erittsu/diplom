@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Панель сотрудника - Складской учет{% endblock %}
+
+{% block body_class %}staff-panel{% endblock %}
+
+{% block container_class %}<div class="staff-container">{% endblock %}
+
+{% block content %}
+    <!-- Навигационная панель -->
+    <div class="staff-navbar">
+        <!-- Добавлена кнопка "Главная" -->
+        <a href="{{ url_for('staff.staff_dashboard') }}" 
+           class="nav-btn {% if request.path == url_for('staff.staff_dashboard') %}active{% endif %}">
+            <i class="fas fa-home"></i> Главная
+        </a>
+
+        <a href="{{ url_for('staff.staff_deliveries') }}" 
+           class="nav-btn {% if request.path.startswith('/staff/deliveries') %}active{% endif %}">
+            <i class="fas fa-truck"></i> Поставки
+        </a>
+        <a href="{{ url_for('staff.staff_outbound') }}" 
+           class="nav-btn {% if request.path.startswith('/staff/outbound') %}active{% endif %}">
+            <i class="fas fa-undo"></i> Возвратные поставки
+        </a>
+        <a href="{{ url_for('staff.staff_inventory') }}" 
+           class="nav-btn {% if request.path.startswith('/staff/inventory') %}active{% endif %}">
+            <i class="fas fa-boxes"></i> Товары на складе
+        </a>
+        
+        <div class="user-menu">
+            <span class="username-display">{{ session['username'] }}</span>
+            <form action="{{ url_for('logout') }}" method="POST">
+                <button type="submit" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Контент страницы -->
+    <div class="staff-content">
+        {% block staff_content %}
+        <!-- Здесь будет контент конкретной страницы -->
+        {% endblock %}
+    </div>
+</div>
+{% endblock %}

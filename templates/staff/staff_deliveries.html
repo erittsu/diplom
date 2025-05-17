@@ -1,0 +1,76 @@
+{% extends "staff/staff_panel.html" %}
+
+{% block staff_content %}
+<div class="staff-section">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Поставки</h2>
+        <div class="btn-group filter-group">
+            <a href="{{ url_for('staff.staff_deliveries') }}"
+               class="btn btn-sm filter-btn {% if not status_filter %}active{% endif %}">
+                Все
+            </a>
+            <a href="{{ url_for('staff.staff_deliveries') }}?status=pending" 
+               class="btn btn-sm filter-btn {% if status_filter == 'pending' %}active{% endif %}">
+                Ожидающие
+            </a>
+            <a href="{{ url_for('staff.staff_deliveries') }}?status=received"
+               class="btn btn-sm filter-btn {% if status_filter == 'received' %}active{% endif %}">
+                Принятые
+            </a>
+            <a href="{{ url_for('staff.staff_deliveries') }}?status=cancelled"
+               class="btn btn-sm filter-btn {% if status_filter == 'cancelled' %}active{% endif %}">
+                Отменённые
+            </a>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="staff-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Поставщик</th>
+                    <th>Дата</th>
+                    <th>Товаров</th>
+                    <th>Статус</th>
+                    <th class="text-center">Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for delivery in deliveries %}
+                <tr>
+                    <td>{{ delivery.delivery_id }}</td>
+                    <td>{{ delivery.supplier_name }}</td>
+                    <td>{{ delivery.delivery_date }}</td>
+                    <td>{{ delivery.items_count }}</td>
+                    <td>
+                        <span class="status-badge status-{{ delivery.status }}">
+                            {% if delivery.status == 'pending' %}Ожидает
+                            {% elif delivery.status == 'received' %}Принята
+                            {% elif delivery.status == 'cancelled' %}Отменена
+                            {% else %}{{ delivery.status }}{% endif %}
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        <div class="action-buttons">
+                            <a href="{{ url_for('staff.staff_delivery_details', delivery_id=delivery.delivery_id) }}"
+                               class="btn btn-sm action-btn view-btn" title="Детали">
+                                <i class="far fa-eye"></i>
+                            </a>
+                            {% if delivery.status == 'pending' %}
+                            <form action="{{ url_for('staff.receive_delivery', delivery_id=delivery.delivery_id) }}"
+                                  method="POST">
+                                <button type="submit" class="btn btn-sm action-btn accept-btn" title="Принять">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
