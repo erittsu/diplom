@@ -1,0 +1,56 @@
+[file name]: templates/profile.html
+{% extends "base.html" %}
+
+{% block title %}Личный кабинет - Складской учет{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <h2>Личный кабинет</h2>
+    </div>
+    
+    <div class="profile-card">
+        <div class="profile-info">
+            <div class="info-item">
+                <span class="info-label">Имя пользователя:</span>
+                <span class="info-value">{{ user_data.username }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Роль:</span>
+                <span class="info-value">
+                    {% if user_data.role == 'staff' %}Сотрудник склада
+                    {% elif user_data.role == 'admin' %}Администратор
+                    {% elif user_data.role == 'supplier' %}Поставщик
+                    {% else %}{{ user_data.role }}{% endif %}
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Дата регистрации:</span>
+                <span class="info-value">{{ user_data.created_at.strftime('%d.%m.%Y') }}</span>
+            </div>
+        </div>
+        
+        {% if stats %}
+        <div class="profile-stats">
+            <h3>Ваша активность</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">{{ stats.total_actions }}</div>
+                    <div class="stat-label">Всего операций</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ stats.processed_deliveries }}</div>
+                    <div class="stat-label">Обработанных поставок</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="profile-actions">
+        <a href="{{ url_for('logout') }}" class="btn btn-logout">
+            <i class="fas fa-sign-out-alt"></i> Выйти из системы
+        </a>
+    </div>
+</div>
+{% endblock %}

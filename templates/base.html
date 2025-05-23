@@ -13,9 +13,23 @@
 <body class="{% block body_class %}{% endblock %}">
     <header class="header">
         <div class="header-title">Складской учет</div>
-        <button class="theme-toggle">
-            <i class="fas fa-moon"></i> Тема
-        </button>
+        <div class="header-controls">
+            {% if 'username' in session %}
+            <div class="user-profile">
+                <span class="username">{{ session['username'] }}</span>
+                <div class="profile-menu">
+                    <a href="{{ url_for('profile') }}" class="profile-btn">
+                        <i class="fas fa-user-circle"></i>
+                    </a>
+                    <form action="{{ url_for('logout') }}" method="POST">
+                        <button type="submit" class="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+        </div>
     </header>
 
     <main class="main-content">
@@ -23,6 +37,17 @@
             {% block content %}{% endblock %}
         </div>
     </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <button class="theme-toggle">
+                <i class="fas fa-moon"></i> Сменить тему
+            </button>
+            <div class="footer-copyright">
+                &copy; 2023 Складской учет. Все права защищены.
+            </div>
+        </div>
+    </footer>
 
     <script src="{{ url_for('static', filename='theme.js') }}"></script>
     {% block scripts %}{% endblock %}

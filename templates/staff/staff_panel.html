@@ -9,7 +9,6 @@
 {% block content %}
     <!-- Навигационная панель -->
     <div class="staff-navbar">
-        <!-- Добавлена кнопка "Главная" -->
         <a href="{{ url_for('staff.staff_dashboard') }}" 
            class="nav-btn {% if request.path == url_for('staff.staff_dashboard') %}active{% endif %}">
             <i class="fas fa-home"></i> Главная
@@ -27,15 +26,6 @@
            class="nav-btn {% if request.path.startswith('/staff/inventory') %}active{% endif %}">
             <i class="fas fa-boxes"></i> Товары на складе
         </a>
-        
-        <div class="user-menu">
-            <span class="username-display">{{ session['username'] }}</span>
-            <form action="{{ url_for('logout') }}" method="POST">
-                <button type="submit" class="logout-btn">
-                    <i class="fas fa-sign-out-alt"></i> Выйти
-                </button>
-            </form>
-        </div>
     </div>
 
     <!-- Контент страницы -->

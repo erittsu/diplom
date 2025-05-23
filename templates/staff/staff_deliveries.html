@@ -9,7 +9,7 @@
                class="btn btn-sm filter-btn {% if not status_filter %}active{% endif %}">
                 Все
             </a>
-            <a href="{{ url_for('staff.staff_deliveries') }}?status=pending" 
+            <a href="{{ url_for('staff.staff_deliveries') }}?status=pending"
                class="btn btn-sm filter-btn {% if status_filter == 'pending' %}active{% endif %}">
                 Ожидающие
             </a>
@@ -25,19 +25,20 @@
     </div>
 
     <div class="table-responsive">
+        {% if deliveries %}
         <table class="staff-table">
             <thead>
                 <tr>
                     <th>ID</th>
                     <th>Поставщик</th>
-                    <th>Дата</th>
+                    <th>Дата ↓</th>
                     <th>Товаров</th>
                     <th>Статус</th>
                     <th class="text-center">Действия</th>
                 </tr>
             </thead>
             <tbody>
-                {% for delivery in deliveries %}
+                {% for delivery in deliveries|sort(attribute='delivery_date', reverse=True) %}
                 <tr>
                     <td>{{ delivery.delivery_id }}</td>
                     <td>{{ delivery.supplier_name }}</td>
@@ -71,6 +72,16 @@
                 {% endfor %}
             </tbody>
         </table>
-    </div>
+        {% else %}
+        <div class="empty-state">
+            <p>
+                {% if status_filter == 'pending' %}Нет ожидающих поставок
+                {% elif status_filter == 'received' %}Нет принятых поставок
+                {% elif status_filter == 'cancelled' %}Нет отменённых поставок
+                {% else %}Нет поставок{% endif %}
+            </p>
+        </div>
+        {% endif %}
+    </div>                   
 </div>
 {% endblock %}

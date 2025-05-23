@@ -116,6 +116,42 @@ def register():
 
     return render_template('register.html')
 
+@app.route('/profile')
+def profile():
+    if 'user_id' not in session:
+        return redirect('/login')
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Получаем данные пользователя
+    cursor.execute("""
+        SELECT username, role, created_at 
+        FROM Users 
+        WHERE user_id = ?
+    """, (session['user_id'],))
+    user_data = cursor.fetchone()
+    
+    # Для сотрудников получаем дополнительную статистику
+    stats = {}
+    if session.get('role') == 'staff':
+        cursor.execute("SELECT COUNT(*) FROM Inventory_Transactions WHERE user_id = ?", (session['user_id'],))
+        stats['total_actions'] = cursor.fetchone()[0]
+        
+        cursor.execute("""
+            SELECT COUNT(DISTINCT delivery_id) 
+            FROM Deliveries D
+            JOIN Inventory_Transactions IT ON IT.related_entity_id = D.delivery_id
+            WHERE IT.user_id = ? AND IT.transaction_type = 'receive_delivery'
+        """, (session['user_id'],))
+        stats['processed_deliveries'] = cursor.fetchone()[0]
+    
+    conn.close()
+    
+    return render_template('profile.html', 
+                         user_data=user_data,
+                         stats=stats)
+
 if __name__ == '__main__':
     app.run(debug=True)
 

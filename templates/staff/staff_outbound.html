@@ -25,19 +25,20 @@
     </div>
 
     <div class="table-responsive">
+        {% if outbounds %}
         <table class="staff-table">
             <thead>
                 <tr>
                     <th>ID</th>
                     <th>Адрес</th>
-                    <th>Дата</th>
+                    <th>Дата ↓</th>
                     <th>Товаров</th>
                     <th>Статус</th>
                     <th class="text-center">Действия</th>
                 </tr>
             </thead>
             <tbody>
-                {% for outbound in outbounds %}
+                {% for outbound in outbounds|sort(attribute='delivery_date', reverse=True) %}
                 <tr>
                     <td>{{ outbound.outbound_id }}</td>
                     <td>{{ outbound.destination_address }}</td>
@@ -67,6 +68,16 @@
                 {% endfor %}
             </tbody>
         </table>
+        {% else %}
+        <div class="empty-state">
+            <p>
+                {% if status_filter == 'preparing' %}Нет поставок в ожидании
+                {% elif status_filter == 'shipped' %}Нет отправленных поставок
+                {% elif status_filter == 'returned' %}Нет возвратов
+                {% else %}Нет возвратных поставок{% endif %}
+            </p>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

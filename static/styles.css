@@ -98,6 +98,45 @@ body {
     color: var(--primary-color);
 }
 
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+}
+
+.username {
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.profile-menu {
+    display: flex;
+    gap: 5px;
+}
+
+.profile-btn, .logout-btn {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 5px;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
 .theme-toggle {
     background: none;
     border: none;
@@ -109,6 +148,18 @@ body {
     padding: 8px 12px;
     border-radius: 5px;
     transition: background-color 0.2s;
+}
+
+.profile-btn:hover {
+    background-color: rgba(var(--primary-color-rgb), 0.1);
+}
+
+.logout-btn {
+    color: var(--error-color);
+}
+
+.logout-btn:hover {
+    background-color: rgba(var(--error-color-rgb), 0.1);
 }
 
 .theme-toggle:hover {
@@ -129,6 +180,7 @@ body {
     justify-content: center;
     align-items: flex-start;
     width: 100%;
+    min-height: calc(100vh - 100px);
 }
 
 /* Общие стили контейнеров */
@@ -435,6 +487,58 @@ button,
     gap: 15px;
 }
 
+/* 9. ФУТЕР */
+.footer {
+    background-color: var(--header-bg);
+    padding: 10px 20px;
+    border-top: 1px solid var(--input-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    z-index: 1000;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-copyright {
+    font-size: 0.85rem;
+    color: var(--footer-color);
+}
+
+.theme-toggle {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9rem;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+
+.theme-toggle:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .theme-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
 
 /* ==================== */
 /* СПЕЦИФИЧНЫЕ СТРАНИЦЫ */
@@ -500,14 +604,40 @@ button,
 /* ==================== */
 
 @media (max-width: 768px) {
-    .header {
-        height: 45px;
+     .header {
+        padding: 0 15px;
     }
     
+    .header-title {
+        font-size: 1.3rem;
+    }
+
+    .username {
+        display: none;
+    }
+    
+    .footer {
+        padding: 10px 15px;
+        flex-direction: column;
+        height: auto;
+        text-align: center;
+        gap: 5px;
+    }
+
+    .footer-copyright {
+        order: 2;
+        font-size: 0.8rem;
+    }
+
+    .theme-toggle {
+        order: 1;
+        padding: 3px 8px;
+        font-size: 0.85rem;
+    }
+
     .main-content {
-        margin-top: 45px;
-        min-height: calc(100vh - 45px);
-        padding: 5px 10px;
+        min-height: calc(100vh - 120px);
+        padding-bottom: 70px;
     }
 
     .login-container,
