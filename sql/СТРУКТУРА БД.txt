@@ -28,9 +28,7 @@ CREATE TABLE Deliveries (
     delivery_date DATE DEFAULT GETDATE(),
     status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'received', 'cancelled')),
     item_list NVARCHAR(MAX) NOT NULL CHECK (ISJSON(item_list) > 0), -- JSON-объект со списком товаров
-    created_by INT NOT NULL,
-    FOREIGN KEY (supplier_id) REFERENCES Suppliers(supplier_id),
-    FOREIGN KEY (created_by) REFERENCES Users(user_id)
+    FOREIGN KEY (supplier_id) REFERENCES Suppliers(supplier_id)
 );
 -- JSON вида: [{"item_name": "Бутылка воды", "article_code": "BW123", "price": 12.50, "weight": 10.0, "size": "30x30x40", "type": "жидкий"}, {...}]
 
@@ -60,10 +58,8 @@ CREATE TABLE Item_Locations (
     item_id INT NOT NULL,
     location_id INT NOT NULL,
     placed_date DATETIME DEFAULT GETDATE(),
-    placed_by INT NOT NULL,
     FOREIGN KEY (item_id) REFERENCES Items(item_id),
-    FOREIGN KEY (location_id) REFERENCES Locations(location_id),
-    FOREIGN KEY (placed_by) REFERENCES Users(user_id)
+    FOREIGN KEY (location_id) REFERENCES Locations(location_id)
 );
 -- Показывает, в какой ячейке находится товар
 
@@ -73,9 +69,10 @@ CREATE TABLE Outbound_Deliveries (
     destination_address VARCHAR(255) NOT NULL,
     delivery_date DATE DEFAULT GETDATE(),
     status VARCHAR(20) DEFAULT 'preparing' CHECK (status IN ('preparing', 'shipped', 'cancelled')),
-    item_list NVARCHAR(MAX) NOT NULL CHECK (ISJSON(item_list) > 0), -- JSON-объект со списком отгружаемых товаров
-    created_by INT NOT NULL,
-    FOREIGN KEY (created_by) REFERENCES Users(user_id)
+    item_list NVARCHAR(MAX) NOT NULL CHECK (ISJSON(item_list) > 0), -- JSON-объект со списком отгружаемых товаров,
+    recipient_type VARCHAR(30) CHECK (recipient_type IN ('other warehouse', 'supplier', 'client')),
+    recipient_name VARCHAR(100),
+    contact_info VARCHAR(255)
 );
 -- JSON вида: [{"item_id": 123, "article_code": "BW123"}, {...}]
 

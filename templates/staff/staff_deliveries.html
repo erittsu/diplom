@@ -40,7 +40,12 @@
             <tbody>
                 {% for delivery in deliveries|sort(attribute='delivery_date', reverse=True) %}
                 <tr>
-                    <td>{{ delivery.delivery_id }}</td>
+                    <td>
+                        <a href="{{ url_for('staff.staff_delivery_details', delivery_id=delivery.delivery_id) }}" 
+                           class="text-primary font-weight-bold">
+                            #{{ delivery.delivery_id }}
+                        </a>
+                    </td>
                     <td>{{ delivery.supplier_name }}</td>
                     <td>{{ delivery.delivery_date }}</td>
                     <td>{{ delivery.items_count }}</td>
@@ -55,13 +60,13 @@
                     <td class="text-center">
                         <div class="action-buttons">
                             <a href="{{ url_for('staff.staff_delivery_details', delivery_id=delivery.delivery_id) }}"
-                               class="btn btn-sm action-btn view-btn" title="Детали">
+                               class="action-btn view-btn" title="Детали поставки">
                                 <i class="far fa-eye"></i>
                             </a>
                             {% if delivery.status == 'pending' %}
                             <form action="{{ url_for('staff.receive_delivery', delivery_id=delivery.delivery_id) }}"
-                                  method="POST">
-                                <button type="submit" class="btn btn-sm action-btn accept-btn" title="Принять">
+                                  method="POST" class="d-inline">
+                                <button type="submit" class="action-btn accept-btn" title="Принять поставку">
                                     <i class="fas fa-check"></i>
                                 </button>
                             </form>

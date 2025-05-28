@@ -2,14 +2,38 @@
 
 {% block staff_content %}
 <div class="staff-section">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <a href="{{ url_for('staff.staff_deliveries') }}" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Назад к поставкам
+    </a>
+
+    {% if error %}
+    <div class="alert alert-danger mb-4">
+        <strong>Ошибка:</strong> {{ error }}
+        {% if delivery and delivery.items_json %}
+        <div class="json-raw-toggle">
+            <button class="btn btn-sm btn-secondary" type="button" data-toggle="collapse" data-target="#jsonRawData">
+                <i class="fas fa-code"></i> Показать сырые данные
+            </button>
+            <div class="json-raw-data collapse mt-2" id="jsonRawData">
+                <pre>{{ delivery.items_json }}</pre>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if delivery %}
+    <div class="delivery-header">
         <h2>Поставка #{{ delivery.delivery_id }}</h2>
         <span class="status-badge status-{{ delivery.status }}">
-            {{ delivery.status }}
+            {% if delivery.status == 'pending' %}Ожидает
+            {% elif delivery.status == 'received' %}Принята
+            {% elif delivery.status == 'cancelled' %}Отменена
+            {% else %}{{ delivery.status }}{% endif %}
         </span>
     </div>
 
-    <div class="delivery-meta mb-4">
+    <div class="delivery-meta">
         <div class="row">
             <div class="col-md-4">
                 <p><strong>Поставщик:</strong> {{ delivery.supplier_name }}</p>
@@ -18,14 +42,14 @@
                 <p><strong>Дата поставки:</strong> {{ delivery.delivery_date }}</p>
             </div>
             <div class="col-md-4">
-                <p><strong>Товаров:</strong> {{ delivery.items|length }}</p>
+                <p><strong>Товаров:</strong> {{ delivery.items_count }}</p>
             </div>
         </div>
     </div>
     
     <h4>Список товаров:</h4>
     <div class="table-responsive">
-        <table class="staff-table">
+        <table class="delivery-items-table">
             <thead>
                 <tr>
                     <th>Название</th>
@@ -37,25 +61,48 @@
                 </tr>
             </thead>
             <tbody>
-                {% for item in delivery.items %}
+                {% if delivery.delivery_items %}
+                {% for item in delivery.delivery_items %}
                 <tr>
                     <td>{{ item.item_name }}</td>
                     <td>{{ item.article_code }}</td>
-                    <td>{{ item.type }}</td>
-                    <td>{{ item.price }}</td>
-                    <td>{{ item.weight }}</td>
+                    <td>
+                        {% if item.type == 'хрупкий' %}
+                        <span class="badge badge-warning">Хрупкий</span>
+                        {% elif item.type == 'жидкий' %}
+                        <span class="badge badge-primary">Жидкий</span>
+                        {% elif item.type == 'крупногабаритный' %}
+                        <span class="badge badge-info">Крупный</span>
+                        {% else %}
+                        {{ item.type }}
+                        {% endif %}
+                    </td>
+                    <td>{{ item.price }} ₽</td>
+                    <td>{{ item.weight }} кг</td>
                     <td>{{ item.size }}</td>
                 </tr>
                 {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center">Нет данных о товарах</td>
+                </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>
     
     {% if delivery.status == 'pending' %}
-    <div class="mt-3">
+    <div class="receive-btn-container">
         <form action="{{ url_for('staff.receive_delivery', delivery_id=delivery.delivery_id) }}" method="POST">
-            <button type="submit" class="btn btn-success">Принять поставку</button>
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-check-circle"></i> Принять поставку
+            </button>
         </form>
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="alert alert-warning">
+        Нет данных о поставке
     </div>
     {% endif %}
 </div>

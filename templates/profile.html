@@ -1,56 +1,174 @@
-[file name]: templates/profile.html
-{% extends "base.html" %}
+{% extends "staff/staff_panel.html" %}
 
 {% block title %}Личный кабинет - Складской учет{% endblock %}
 
-{% block content %}
-<div class="profile-container">
+{% block staff_content %}
+<!-- Подключаем общие стили -->
+<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+<!-- Подключаем стили для профиля -->
+<link rel="stylesheet" href="{{ url_for('static', filename='staff_styles.css') }}">
+
+<div class="staff-profile-container">
+    <!-- Заголовок -->
     <div class="profile-header">
-        <h2>Личный кабинет</h2>
+        <h2><i class="fas fa-user-circle"></i> Личный кабинет</h2>
+        <p class="profile-subheader"><i class="fas fa-id-badge"></i> ID: {{ session['user_id'] }}</p>
     </div>
-    
-    <div class="profile-card">
-        <div class="profile-info">
-            <div class="info-item">
-                <span class="info-label">Имя пользователя:</span>
-                <span class="info-value">{{ user_data.username }}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Роль:</span>
-                <span class="info-value">
-                    {% if user_data.role == 'staff' %}Сотрудник склада
-                    {% elif user_data.role == 'admin' %}Администратор
-                    {% elif user_data.role == 'supplier' %}Поставщик
-                    {% else %}{{ user_data.role }}{% endif %}
-                </span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Дата регистрации:</span>
-                <span class="info-value">{{ user_data.created_at.strftime('%d.%m.%Y') }}</span>
+
+    <!-- Основные метрики -->
+    <div class="profile-metrics-grid">
+        <!-- Карточка пользователя -->
+        <div class="profile-metric-card">
+            <div class="profile-metric-inner">
+                <div class="profile-metric-icon bg-primary">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="profile-metric-info">
+                    <h3>{{ session['username'] }}</h3>
+                    <p>Имя пользователя</p>
+                </div>
             </div>
         </div>
-        
-        {% if stats %}
-        <div class="profile-stats">
-            <h3>Ваша активность</h3>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value">{{ stats.total_actions }}</div>
-                    <div class="stat-label">Всего операций</div>
+
+        <!-- Карточка роли -->
+        <div class="profile-metric-card">
+            <div class="profile-metric-inner">
+                <div class="profile-metric-icon bg-info">
+                    <i class="fas fa-user-shield"></i>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value">{{ stats.processed_deliveries }}</div>
-                    <div class="stat-label">Обработанных поставок</div>
+                <div class="profile-metric-info">
+                    <h3>
+                        {% if session['role'] == 'staff' %}Сотрудник
+                        {% elif session['role'] == 'admin' %}Администратор
+                        {% elif session['role'] == 'supplier' %}Поставщик
+                        {% else %}{{ session['role'] }}{% endif %}
+                    </h3>
+                    <p>Роль в системе</p>
+                </div>
+            </div>
+        </div>
+
+        {% if stats %}
+        <!-- Карточка активности -->
+        <div class="profile-metric-card">
+            <div class="profile-metric-inner">
+                <div class="profile-metric-icon bg-success">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="profile-metric-info">
+                    <h3>{{ stats.total_actions }}</h3>
+                    <p>Всего операций</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Карточка поставок -->
+        <div class="profile-metric-card">
+            <div class="profile-metric-inner">
+                <div class="profile-metric-icon bg-warning">
+                    <i class="fas fa-truck-loading"></i>
+                </div>
+                <div class="profile-metric-info">
+                    <h3>{{ stats.processed_deliveries }}</h3>
+                    <p>Обработанных поставок</p>
                 </div>
             </div>
         </div>
         {% endif %}
     </div>
-    
-    <div class="profile-actions">
-        <a href="{{ url_for('logout') }}" class="btn btn-logout">
-            <i class="fas fa-sign-out-alt"></i> Выйти из системы
-        </a>
+
+    <!-- Детали профиля -->
+    <div class="profile-details-section">
+        <!-- Информация о пользователе -->
+        <div class="profile-detail-card">
+            <div class="profile-card-header">
+                <i class="fas fa-info-circle"></i>
+                <h3>Основная информация</h3>
+            </div>
+            <div class="profile-card-body">
+                <div class="profile-detail-grid">
+                    <div class="profile-detail-item">
+                        <span class="profile-detail-label">
+                            <i class="fas fa-envelope"></i> Email
+                        </span>
+                        <span class="profile-detail-value">
+                            {{ session.get('email', 'Не указан') }}
+                        </span>
+                    </div>
+                    <div class="profile-detail-item">
+                        <span class="profile-detail-label">
+                            <i class="fas fa-calendar-alt"></i> Дата регистрации
+                        </span>
+                        <span class="profile-detail-value">
+                            {{ session.get('registration_date', 'Неизвестно') }}
+                        </span>
+                    </div>
+                    <div class="profile-detail-item">
+                        <span class="profile-detail-label">
+                            <i class="fas fa-clock"></i> Последний вход
+                        </span>
+                        <span class="profile-detail-value">
+                            {{ session.get('last_login', 'Неизвестно') }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Безопасность -->
+        <div class="profile-detail-card">
+            <div class="profile-card-header">
+                <i class="fas fa-shield-alt"></i>
+                <h3>Безопасность</h3>
+            </div>
+            <div class="profile-card-body">
+                <div class="profile-security-item">
+                    <div class="profile-security-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="profile-security-info">
+                        <h4>Пароль</h4>
+                        <p>Последнее изменение: {{ session.get('password_changed', 'Неизвестно') }}</p>
+                    </div>
+                    <button class="profile-edit-btn">
+                        <i class="fas fa-pencil-alt"></i> Изменить
+                    </button>
+                </div>
+                <div class="profile-security-item">
+                    <div class="profile-security-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <div class="profile-security-info">
+                        <h4>Двухфакторная аутентификация</h4>
+                        <p>Не подключена</p>
+                    </div>
+                    <button class="profile-edit-btn">
+                        <i class="fas fa-plus-circle"></i> Подключить
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Действия -->
+    <div class="profile-actions-panel">
+        <div class="profile-actions-header">
+            <i class="fas fa-cog"></i>
+            <h3>Действия</h3>
+        </div>
+        <div class="profile-action-buttons">
+            <button class="profile-action-btn">
+                <i class="fas fa-pencil-alt"></i> Редактировать профиль
+            </button>
+            <button class="profile-action-btn">
+                <i class="fas fa-bell"></i> Настройки уведомлений
+            </button>
+            <form action="{{ url_for('logout') }}" method="POST" class="profile-action-btn logout">
+                <button type="submit" class="profile-action-btn logout">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </button>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}

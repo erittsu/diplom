@@ -317,31 +317,31 @@ def staff_deliveries():
 
     # Базовый запрос
     query = """
-        SELECT D.delivery_id, S.supplier_name, 
-               D.delivery_date,
-               D.status, D.item_list as items_json
+        SELECT 
+            D.delivery_id, 
+            S.supplier_name, 
+            FORMAT(D.delivery_date, 'dd.MM.yyyy') as delivery_date,
+            D.status, 
+            D.item_list as items_json,
+            (SELECT COUNT(*) FROM OPENJSON(D.item_list)) as items_count
         FROM Deliveries D
         JOIN Suppliers S ON D.supplier_id = S.supplier_id
     """
     
-    # Добавляем условие WHERE если есть фильтр
+    # Добавляем фильтр если есть
     if status_filter:
         query += " WHERE D.status = ?"
-        cursor.execute(query, (status_filter,))
+        params = (status_filter,)
     else:
-        query += " ORDER BY D.delivery_date DESC"
-        cursor.execute(query)
+        params = ()
     
-    deliveries = []
-    for row in cursor.fetchall():
-        delivery = dict(zip([column[0] for column in cursor.description], row))
-        try:
-            delivery['items'] = json.loads(delivery['items_json'])
-            delivery['items_count'] = len(delivery['items'])
-        except:
-            delivery['items'] = []
-            delivery['items_count'] = 0
-        deliveries.append(delivery)
+    query += " ORDER BY D.delivery_date DESC"
+    
+    cursor.execute(query, params)
+    
+    # Получаем данные
+    columns = [column[0] for column in cursor.description]
+    deliveries = [dict(zip(columns, row)) for row in cursor.fetchall()]
     
     conn.close()
     
@@ -359,33 +359,65 @@ def staff_delivery_details(delivery_id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("""
-        SELECT D.delivery_id, S.supplier_name, 
-               FORMAT(D.delivery_date, 'dd.MM.yyyy') as delivery_date, 
-               D.status, D.item_list as items_json
-        FROM Deliveries D
-        JOIN Suppliers S ON D.supplier_id = S.supplier_id
-        WHERE D.delivery_id = ?
-    """, (delivery_id,))
-    
-    delivery = cursor.fetchone()
-    if not delivery:
-        conn.close()
-        return "Delivery not found", 404
-    
-    delivery = dict(zip([column[0] for column in cursor.description], delivery))
     try:
-        delivery['items'] = json.loads(delivery['items_json'])
-    except:
-        delivery['items'] = []
-    
-    conn.close()
-    
-    return render_template(
-        'staff/staff_delivery_details.html',
-        delivery=delivery
-    )
+        # Получаем данные о поставке
+        cursor.execute("""
+            SELECT 
+                D.delivery_id, 
+                S.supplier_name, 
+                FORMAT(D.delivery_date, 'dd.MM.yyyy') as delivery_date, 
+                D.status, 
+                D.item_list as items_json
+            FROM Deliveries D
+            JOIN Suppliers S ON D.supplier_id = S.supplier_id
+            WHERE D.delivery_id = ?
+        """, (delivery_id,))
+        
+        row = cursor.fetchone()
+        if not row:
+            return render_template('staff/staff_delivery_details.html', 
+                                error='Поставка не найдена',
+                                delivery=None)
 
+        # Получаем названия колонок
+        columns = [column[0] for column in cursor.description]
+        delivery = dict(zip(columns, row))
+        
+        # Обработка JSON
+        items = []
+        json_error = None
+        items_json = delivery.get('items_json', '[]')
+        
+        try:
+            items = json.loads(items_json)
+            if not isinstance(items, list):
+                items = []
+                json_error = 'Некорректный формат списка товаров'
+        except Exception as e:
+            json_error = f'Ошибка при чтении списка товаров: {str(e)}'
+            print(f"JSON decode error: {e}\nOriginal JSON: {items_json}")
+
+        delivery_data = {
+            'delivery_id': delivery.get('delivery_id'),
+            'supplier_name': delivery.get('supplier_name'),
+            'delivery_date': delivery.get('delivery_date'),
+            'status': delivery.get('status'),
+            'delivery_items': items,  # ✅
+            'items_count': len(items),
+            'items_json': items_json
+        }
+        
+        return render_template('staff/staff_delivery_details.html', 
+                            delivery=delivery_data,
+                            error=json_error)
+        
+    except Exception as e:
+        return render_template('staff/staff_delivery_details.html',
+                            error=f'Ошибка при обработке данных: {str(e)}',
+                            delivery=None)
+    finally:
+        conn.close()
+        
 @staff_bp.route('/outbound')
 def staff_outbound():
     if 'user_id' not in session or session.get('role') != 'staff':

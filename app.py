@@ -124,80 +124,34 @@ def profile():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # Получаем данные пользователя
-    cursor.execute("""
-        SELECT username, role, created_at 
-        FROM Users 
-        WHERE user_id = ?
-    """, (session['user_id'],))
-    user_data = cursor.fetchone()
-    
-    # Для сотрудников получаем дополнительную статистику
-    stats = {}
+    stats = None
     if session.get('role') == 'staff':
-        cursor.execute("SELECT COUNT(*) FROM Inventory_Transactions WHERE user_id = ?", (session['user_id'],))
-        stats['total_actions'] = cursor.fetchone()[0]
-        
-        cursor.execute("""
-            SELECT COUNT(DISTINCT delivery_id) 
-            FROM Deliveries D
-            JOIN Inventory_Transactions IT ON IT.related_entity_id = D.delivery_id
-            WHERE IT.user_id = ? AND IT.transaction_type = 'receive_delivery'
-        """, (session['user_id'],))
-        stats['processed_deliveries'] = cursor.fetchone()[0]
+        try:
+            # Общее количество действий
+            cursor.execute("SELECT COUNT(*) FROM Inventory_Transactions WHERE user_id = ?", 
+                         (session['user_id'],))
+            total_actions = cursor.fetchone()[0]
+            
+            # Операции приемки
+            cursor.execute("""
+                SELECT COUNT(*) 
+                FROM Inventory_Transactions 
+                WHERE user_id = ? AND transaction_type = 'receive_delivery'
+            """, (session['user_id'],))
+            
+            processed_deliveries = cursor.fetchone()[0]
+            
+            stats = {
+                'total_actions': total_actions,
+                'processed_deliveries': processed_deliveries
+            }
+        except Exception as e:
+            print(f"Ошибка получения статистики: {str(e)}")
+            stats = None
     
     conn.close()
     
-    return render_template('profile.html', 
-                         user_data=user_data,
-                         stats=stats)
+    return render_template('profile.html', stats=stats)
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-# Users ↔ Deliveries (created_by) (удалена)
-# Было: Deliveries.created_by → Users.user_id
-
-# Причина:
-
-# Поставки инициируются системой при получении данных от поставщика
-
-# Ответственный фиксируется в журнале при подтверждении получения
-
-# Альтернатива:
-
-# sql
-# SELECT user_id FROM Inventory_Transactions 
-# WHERE transaction_type = 'receive_delivery' 
-#   AND related_entity_id = [delivery_id]
-# 4. Users ↔ Item_Locations (placed_by) (удалена)
-# Было: Item_Locations.placed_by → Users.user_id
-
-# Причина:
-
-# Размещение товаров — часть процесса приемки
-
-# Достаточно фиксации в журнале операций
-
-# Альтернатива:
-
-# sql
-# SELECT user_id FROM Inventory_Transactions
-# WHERE transaction_type = 'place' 
-#   AND item_id = [item_id] 
-#   AND location_id = [location_id]
-# 5. Users ↔ Outbound_Deliveries (created_by) (удалена)
-# Было: Outbound_Deliveries.created_by → Users.user_id
-
-# Причина:
-
-# Отгрузки могут создаваться автоматически (например, из заказов)
-
-# Ответственный фиксируется при подтверждении отгрузки
-
-# Альтернатива:
-
-# sql
-# SELECT user_id FROM Inventory_Transactions
-# WHERE transaction_type = 'create_outbound' 
-#   AND related_entity_id = [outbound_id]
