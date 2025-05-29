@@ -4,23 +4,59 @@
 <div class="staff-section">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Поставки</h2>
-        <div class="btn-group filter-group">
-            <a href="{{ url_for('staff.staff_deliveries') }}"
-               class="btn btn-sm filter-btn {% if not status_filter %}active{% endif %}">
-                Все
-            </a>
-            <a href="{{ url_for('staff.staff_deliveries') }}?status=pending"
-               class="btn btn-sm filter-btn {% if status_filter == 'pending' %}active{% endif %}">
-                Ожидающие
-            </a>
-            <a href="{{ url_for('staff.staff_deliveries') }}?status=received"
-               class="btn btn-sm filter-btn {% if status_filter == 'received' %}active{% endif %}">
-                Принятые
-            </a>
-            <a href="{{ url_for('staff.staff_deliveries') }}?status=cancelled"
-               class="btn btn-sm filter-btn {% if status_filter == 'cancelled' %}active{% endif %}">
-                Отменённые
-            </a>
+        <div class="d-flex align-items-center">
+            <div class="btn-group filter-group mr-3">
+                <a href="{{ url_for('staff.staff_deliveries') }}?sort={{ current_sort }}"
+                   class="btn btn-sm filter-btn {% if not status_filter %}active{% endif %}">
+                    Все
+                </a>
+                <a href="{{ url_for('staff.staff_deliveries') }}?status=pending&sort={{ current_sort }}"
+                   class="btn btn-sm filter-btn {% if status_filter == 'pending' %}active{% endif %}">
+                    Ожидающие
+                </a>
+                <a href="{{ url_for('staff.staff_deliveries') }}?status=received&sort={{ current_sort }}"
+                   class="btn btn-sm filter-btn {% if status_filter == 'received' %}active{% endif %}">
+                    Принятые
+                </a>
+                <a href="{{ url_for('staff.staff_deliveries') }}?status=cancelled&sort={{ current_sort }}"
+                   class="btn btn-sm filter-btn {% if status_filter == 'cancelled' %}active{% endif %}">
+                    Отменённые
+                </a>
+            </div>
+                <div class="sort-dropdown">
+                    <button class="sort-toggle">
+                        <i class="fas fa-sort-amount-down-alt" style="font-size: 0.9rem; opacity: 0.7;"></i>
+                        Сортировка
+                    </button>
+                    <div class="sort-menu">
+                        <a href="{{ url_for('staff.staff_deliveries', status=status_filter, sort='date_desc') }}" 
+                        class="sort-item {% if current_sort == 'date_desc' %}active{% endif %}">
+                            Новые сначала
+                            <span class="sort-icon"></span>
+                        </a>
+                        <a href="{{ url_for('staff.staff_deliveries', status=status_filter, sort='date_asc') }}" 
+                        class="sort-item {% if current_sort == 'date_asc' %}active{% endif %}">
+                            Старые сначала
+                            <span class="sort-icon"></span>
+                        </a>
+                        <a href="{{ url_for('staff.staff_deliveries', status=status_filter, sort='today') }}" 
+                        class="sort-item {% if current_sort == 'today' %}active{% endif %}">
+                            Сегодня
+                            <span class="sort-icon"></span>
+                        </a>
+                        <a href="{{ url_for('staff.staff_deliveries', status=status_filter, sort='week') }}" 
+                        class="sort-item {% if current_sort == 'week' %}active{% endif %}">
+                            На этой неделе
+                            <span class="sort-icon"></span>
+                        </a>
+                        <a href="{{ url_for('staff.staff_deliveries', status=status_filter, sort='month') }}" 
+                        class="sort-item {% if current_sort == 'month' %}active{% endif %}">
+                            В этом месяце
+                            <span class="sort-icon"></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -31,14 +67,14 @@
                 <tr>
                     <th>ID</th>
                     <th>Поставщик</th>
-                    <th>Дата ↓</th>
+                    <th>Дата {% if current_sort == 'date_asc' %}↑{% else %}↓{% endif %}</th>
                     <th>Товаров</th>
                     <th>Статус</th>
                     <th class="text-center">Действия</th>
                 </tr>
             </thead>
             <tbody>
-                {% for delivery in deliveries|sort(attribute='delivery_date', reverse=True) %}
+                {% for delivery in deliveries %}
                 <tr>
                     <td>
                         <a href="{{ url_for('staff.staff_delivery_details', delivery_id=delivery.delivery_id) }}" 

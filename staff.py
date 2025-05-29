@@ -312,6 +312,8 @@ def staff_deliveries():
         return redirect('/login')
 
     status_filter = request.args.get('status')
+    sort_by = request.args.get('sort', 'date_desc')
+    
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -323,19 +325,36 @@ def staff_deliveries():
             FORMAT(D.delivery_date, 'dd.MM.yyyy') as delivery_date,
             D.status, 
             D.item_list as items_json,
-            (SELECT COUNT(*) FROM OPENJSON(D.item_list)) as items_count
+            (SELECT COUNT(*) FROM OPENJSON(D.item_list)) as items_count,
+            CASE WHEN D.status = 'pending' THEN 0 ELSE 1 END as priority
         FROM Deliveries D
         JOIN Suppliers S ON D.supplier_id = S.supplier_id
     """
     
-    # Добавляем фильтр если есть
-    if status_filter:
-        query += " WHERE D.status = ?"
-        params = (status_filter,)
-    else:
-        params = ()
+    params = ()
+    where_clauses = []
     
-    query += " ORDER BY D.delivery_date DESC"
+    # Добавляем фильтр если указан и не равен 'all'
+    if status_filter and status_filter != 'all':
+        where_clauses.append("D.status = ?")
+        params = (status_filter,)
+    
+    # Добавляем фильтр по дате в зависимости от сортировки
+    if sort_by == 'today':
+        where_clauses.append("CAST(D.delivery_date AS DATE) = CAST(GETDATE() AS DATE)")
+    elif sort_by == 'week':
+        where_clauses.append("D.delivery_date >= DATEADD(day, -7, GETDATE())")
+    elif sort_by == 'month':
+        where_clauses.append("D.delivery_date >= DATEADD(month, -1, GETDATE())")
+    
+    if where_clauses:
+        query += " WHERE " + " AND ".join(where_clauses)
+    
+    # Добавляем сортировку
+    if sort_by in ['date_asc', 'today', 'week', 'month']:
+        query += " ORDER BY priority ASC, D.delivery_date ASC"
+    else:  # По умолчанию: date_desc и другие случаи
+        query += " ORDER BY priority ASC, D.delivery_date DESC"
     
     cursor.execute(query, params)
     
@@ -348,7 +367,8 @@ def staff_deliveries():
     return render_template(
         'staff/staff_deliveries.html',
         deliveries=deliveries,
-        status_filter=status_filter
+        status_filter=status_filter,
+        current_sort=sort_by
     )
 
 @staff_bp.route('/deliveries/<int:delivery_id>')
@@ -402,7 +422,7 @@ def staff_delivery_details(delivery_id):
             'supplier_name': delivery.get('supplier_name'),
             'delivery_date': delivery.get('delivery_date'),
             'status': delivery.get('status'),
-            'delivery_items': items,  # ✅
+            'delivery_items': items,  
             'items_count': len(items),
             'items_json': items_json
         }
