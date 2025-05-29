@@ -2,7 +2,8 @@
 
 {% block staff_content %}
 <div class="staff-section">
-    <a href="{{ url_for('staff.staff_deliveries') }}" class="back-btn">
+    <!-- Кнопка "Назад" в синем стиле -->
+    <a href="{{ url_for('staff.staff_deliveries') }}" class="back-btn-blue">
         <i class="fas fa-arrow-left"></i> Назад к поставкам
     </a>
 
@@ -11,7 +12,7 @@
         <strong>Ошибка:</strong> {{ error }}
         {% if delivery and delivery.items_json %}
         <div class="json-raw-toggle">
-            <button class="btn btn-sm btn-secondary" type="button" data-toggle="collapse" data-target="#jsonRawData">
+            <button class="btn btn-sm btn-outline-primary" type="button" data-toggle="collapse" data-target="#jsonRawData">
                 <i class="fas fa-code"></i> Показать сырые данные
             </button>
             <div class="json-raw-data collapse mt-2" id="jsonRawData">
@@ -33,21 +34,31 @@
         </span>
     </div>
 
-    <div class="delivery-meta">
-        <div class="row">
-            <div class="col-md-4">
-                <p><strong>Поставщик:</strong> {{ delivery.supplier_name }}</p>
+    <!-- Улучшенный блок с метаданными поставки -->
+    <div class="delivery-meta-card">
+        <div class="meta-grid">
+            <div class="meta-item">
+                <div class="meta-label">Поставщик</div>
+                <div class="meta-value">{{ delivery.supplier_name }}</div>
             </div>
-            <div class="col-md-4">
-                <p><strong>Дата поставки:</strong> {{ delivery.delivery_date }}</p>
+            <div class="meta-item">
+                <div class="meta-label">Дата поставки</div>
+                <div class="meta-value">{{ delivery.delivery_date }}</div>
             </div>
-            <div class="col-md-4">
-                <p><strong>Товаров:</strong> {{ delivery.items_count }}</p>
+            <div class="meta-item">
+                <div class="meta-label">Товаров</div>
+                <div class="meta-value">{{ delivery.items_count }}</div>
             </div>
         </div>
     </div>
     
-    <h4>Список товаров:</h4>
+    <!-- Заголовок списка товаров с иконкой -->
+    <div class="section-header">
+        <i class="fas fa-boxes"></i>
+        <h4>Список товаров</h4>
+    </div>
+    
+    <!-- Таблица товаров -->
     <div class="table-responsive">
         <table class="delivery-items-table">
             <thead>
@@ -94,7 +105,7 @@
     {% if delivery.status == 'pending' %}
     <div class="receive-btn-container">
         <form action="{{ url_for('staff.receive_delivery', delivery_id=delivery.delivery_id) }}" method="POST">
-            <button type="submit" class="btn btn-success">
+            <button type="submit" class="btn btn-primary">
                 <i class="fas fa-check-circle"></i> Принять поставку
             </button>
         </form>

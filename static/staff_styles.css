@@ -914,28 +914,122 @@
     text-align: right;
 }
 
-/* Стили для таблицы в деталях поставки */
+/* ==================== */
+/* СТИЛИ ДЛЯ ДЕТАЛЕЙ ПОСТАВКИ */
+/* ==================== */
+
+/* 1. Заголовок поставки и статус */
+.back-btn-blue {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background-color: rgba(var(--primary-color-rgb), 0.1);
+    color: var(--primary-color);
+    border: 1px solid rgba(var(--primary-color-rgb), 0.3);
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    margin-bottom: 20px;
+}
+
+.back-btn-blue:hover {
+    background-color: rgba(var(--primary-color-rgb), 0.2);
+    text-decoration: none;
+}
+
+.delivery-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.status-pending { 
+    background-color: rgba(255, 193, 7, 0.2); 
+    color: var(--warning-color); 
+}
+
+/* 2. Карточка метаданных поставки */
+.delivery-meta-card {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0 25px;
+    border-left: 4px solid var(--primary-color);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.meta-item {
+    padding: 10px;
+}
+
+.meta-label {
+    font-size: 0.95rem;
+    color: var(--placeholder-color);
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.meta-value {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+/* 3. Таблица товаров */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+}
+
 .delivery-items-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    margin: 20px 0;
+    margin: 0;
+    background-color: var(--card-color);
+    border-radius: 8px;
+    overflow: hidden;
+    min-width: 600px;
 }
 
 .delivery-items-table th {
-    background-color: rgba(0, 0, 0, 0.03);
+    background-color: #f1f5f9;
     padding: 12px 15px;
     text-align: left;
     font-weight: 600;
     color: var(--placeholder-color);
-    border-bottom: 2px solid var(--input-border);
+    border-bottom: 2px solid #e2e8f0;
     vertical-align: middle;
 }
 
 .delivery-items-table td {
     padding: 12px 15px;
-    border-bottom: 1px solid var(--input-border);
+    border-bottom: 1px solid #e2e8f0;
     vertical-align: middle;
+}
+
+.delivery-items-table tr:last-child td {
+    border-bottom: none;
 }
 
 .delivery-items-table th:first-child,
@@ -947,50 +1041,54 @@
 .delivery-items-table td:last-child {
     padding-right: 20px;
 }
-/* Бейджи типов товаров */
+
+/* 4. Бейджи типов товаров */
 .badge {
     display: inline-block;
-    padding: 4px 10px;
+    padding: 6px 12px;
     border-radius: 12px;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 500;
 }
 
-.badge-warning {
-    background-color: rgba(var(--warning-color-rgb), 0.15);
-    color: var(--warning-color);
-}
-
-.badge-primary {
-    background-color: rgba(var(--info-color-rgb), 0.15);
-    color: var(--info-color);
-}
-
-.badge-info {
-    background-color: rgba(var(--primary-color-rgb), 0.15);
-    color: var(--primary-color);
-}
-
-/* Кнопка принятия поставки */
+/* 5. Кнопка принятия поставки */
 .receive-btn-container {
-    margin-top: 25px;
+    margin-top: 30px;
     padding-top: 20px;
-    border-top: 1px solid var(--input-border);
+    border-top: 1px solid #e2e8f0;
+    text-align: right;
 }
 
-/* Сырые данные JSON */
-.json-raw-toggle {
-    margin-top: 10px;
-}
+/* ==================== */
+/* АДАПТИВНОСТЬ */
+/* ==================== */
 
-.json-raw-data {
-    background-color: rgba(0, 0, 0, 0.03);
-    border-radius: 6px;
-    padding: 15px;
-    margin-top: 10px;
-    font-family: monospace;
-    white-space: pre-wrap;
-    word-break: break-all;
-    max-height: 300px;
-    overflow-y: auto;
+@media (max-width: 768px) {
+    .delivery-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .meta-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .meta-item {
+        padding: 12px 0;
+    }
+    
+    .delivery-items-table {
+        font-size: 0.9rem;
+    }
+    
+    .delivery-items-table th,
+    .delivery-items-table td {
+        padding: 8px 12px;
+    }
+    
+    .badge {
+        padding: 4px 8px;
+        font-size: 0.8rem;
+    }
 }

@@ -29,14 +29,14 @@ def login():
     error = None
     
     if request.method == 'POST':
-        [username = request.form['username']
+        username = request.form['username']
         password = request.form['password']
 
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT user_id, password, role FROM Users WHERE username = ?", (username,))
         user = cursor.fetchone()
-        conn.close()]
+        conn.close()
 
         if user and bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
             session['user_id'] = user.user_id
