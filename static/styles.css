@@ -46,6 +46,11 @@
     --gradient-start: #1a1a1a;
     --gradient-end: #1a1a1a;
     --primary-color-rgb: 74, 159, 245;
+    --table-header-bg: rgba(255, 255, 255, 0.05);
+    --table-header-text: rgba(255, 255, 255, 0.7);
+    --table-border: rgba(255, 255, 255, 0.1);
+    --meta-card-bg: rgba(255, 255, 255, 0.05);
+    --meta-label-color: rgba(255, 255, 255, 0.6);
 }
 
 /* Базовые стили */
