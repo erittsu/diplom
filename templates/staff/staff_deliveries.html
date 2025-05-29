@@ -78,10 +78,11 @@
                 <tr>
                     <td>
                         <a href="{{ url_for('staff.staff_delivery_details', delivery_id=delivery.delivery_id) }}" 
-                           class="text-primary font-weight-bold">
-                            #{{ delivery.delivery_id }}
+                        class="delivery-id-link">
+                        #{{ delivery.delivery_id }}
                         </a>
                     </td>
+
                     <td>{{ delivery.supplier_name }}</td>
                     <td>{{ delivery.delivery_date }}</td>
                     <td>{{ delivery.items_count }}</td>
