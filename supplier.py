@@ -85,6 +85,7 @@ def create_delivery():
 
     supplier_id = result.supplier_id
 
+    # Проверка валидности JSON
     try:
         cursor.execute("""
             INSERT INTO Deliveries (supplier_id, delivery_date, status, item_list)

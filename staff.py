@@ -109,7 +109,7 @@ def receive_delivery(delivery_id):
             
             if not location_id:
                 conn.rollback()
-                return f"No available locations for item type {item_type}", 400
+                return f"Нет доступной ячейки для товара типа: {item_type}", 400
 
             # проверка совместимости
             cursor.execute("""

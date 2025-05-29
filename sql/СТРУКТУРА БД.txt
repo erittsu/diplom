@@ -43,6 +43,7 @@ CREATE TABLE Items (
     item_type VARCHAR(30) CHECK (item_type IN ('хрупкий', 'жидкий', 'крупногабаритный')),
     status VARCHAR(20) DEFAULT 'accepted' CHECK (status IN ('accepted', 'shipped'))
 );
+ALTER TABLE Items ADD created_date DATETIME DEFAULT GETDATE();
 -- Каждая единица товара — отдельная запись
 
 -- 5. Ячейки склада
@@ -50,6 +51,10 @@ CREATE TABLE Locations (
     location_id INT IDENTITY(1,1) PRIMARY KEY,
     location_name VARCHAR(50) NOT NULL UNIQUE
 );
+--  Добавляем тип ячейки в таблицу Locations
+ALTER TABLE Locations ADD location_type VARCHAR(30) 
+CHECK (location_type IN ('хрупкий', 'жидкий', 'крупногабаритный', 'обычный'));
+
 -- Статус занятости будет рассчитываться через представление
 
 -- 6. Размещение товара в ячейку
@@ -62,6 +67,11 @@ CREATE TABLE Item_Locations (
     FOREIGN KEY (location_id) REFERENCES Locations(location_id)
 );
 -- Показывает, в какой ячейке находится товар
+
+-- Добавляем ограничения на размещение товаров
+ALTER TABLE Item_Locations ADD CONSTRAINT FK_Item_Locations_Compatible 
+FOREIGN KEY (location_id) REFERENCES Locations(location_id);
+
 
 -- 7. Отгрузки (исходящие поставки)
 CREATE TABLE Outbound_Deliveries (
@@ -103,7 +113,7 @@ CREATE TABLE Inventory_Transactions (
 -- Inventory_Transactions - логирование всех действий пользователей
 
 
-ALTER TABLE Items ADD created_date DATETIME DEFAULT GETDATE();
+
 
 -- Триггер для освобождения ячеек при удалении товара
 CREATE TRIGGER trg_after_item_delete
@@ -117,15 +127,6 @@ BEGIN
     INSERT INTO Inventory_Transactions (user_id, item_id, transaction_type)
     SELECT 1, item_id, 'item_deleted' FROM deleted  -- user_id 1 = система
 END;
-
--- 1. Добавляем тип ячейки в таблицу Locations
-ALTER TABLE Locations ADD location_type VARCHAR(30) 
-CHECK (location_type IN ('хрупкий', 'жидкий', 'крупногабаритный', 'обычный'));
-
--- 2. Добавляем ограничения на размещение товаров
-ALTER TABLE Item_Locations ADD CONSTRAINT FK_Item_Locations_Compatible 
-FOREIGN KEY (location_id) REFERENCES Locations(location_id);
-
 
 
 -- 3. Создаем триггер для проверки совместимости товара и ячейки
