@@ -25,7 +25,9 @@
 
     {% if delivery %}
     <div class="delivery-header">
-        <h2>Поставка #{{ delivery.delivery_id }}</h2>
+        <div class="delivery-title">
+            <h2>Поставка #{{ delivery.delivery_id }}</h2>
+        </div>
         <span class="status-badge status-{{ delivery.status }}">
             {% if delivery.status == 'pending' %}Ожидает
             {% elif delivery.status == 'received' %}Принята
@@ -58,59 +60,79 @@
         <h4>Список товаров</h4>
     </div>
     
-    <!-- Таблица товаров -->
-    <div class="table-responsive">
-        <table class="delivery-items-table">
-            <thead>
-                <tr>
-                    <th>Название</th>
-                    <th>Артикул</th>
-                    <th>Тип</th>
-                    <th>Цена</th>
-                    <th>Вес</th>
-                    <th>Размер</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if delivery.delivery_items %}
-                {% for item in delivery.delivery_items %}
-                <tr>
-                    <td>{{ item.item_name }}</td>
-                    <td>{{ item.article_code }}</td>
-                    <td>
-                        {% if item.type == 'хрупкий' %}
-                        <span class="badge badge-warning">Хрупкий</span>
-                        {% elif item.type == 'жидкий' %}
-                        <span class="badge badge-primary">Жидкий</span>
-                        {% elif item.type == 'крупногабаритный' %}
-                        <span class="badge badge-info">Крупный</span>
-                        {% else %}
-                        {{ item.type }}
-                        {% endif %}
-                    </td>
-                    <td>{{ item.price }} ₽</td>
-                    <td>{{ item.weight }} кг</td>
-                    <td>{{ item.size }}</td>
-                </tr>
-                {% endfor %}
-                {% else %}
-                <tr>
-                    <td colspan="6" class="text-center">Нет данных о товарах</td>
-                </tr>
-                {% endif %}
-            </tbody>
-        </table>
-    </div>
-    
-    {% if delivery.status == 'pending' %}
-    <div class="receive-btn-container">
-        <form action="{{ url_for('staff.receive_delivery', delivery_id=delivery.delivery_id) }}" method="POST">
-            <button type="submit" class="btn btn-primary">
-                <i class="fas fa-check-circle"></i> Принять поставку
-            </button>
-        </form>
-    </div>
-    {% endif %}
+    <!-- Форма для приёмки товаров -->
+    <form method="POST">
+        <!-- Таблица товаров -->
+        <div class="table-responsive">
+            <table class="delivery-items-table">
+                <thead>
+                    <tr>
+                        <th>Название</th>
+                        <th>Артикул</th>
+                        <th>Тип</th>
+                        <th>Цена</th>
+                        <th>Вес</th>
+                        <th>Размер</th>
+                        <th>Ячейка</th>
+                        <th>Статус</th>
+                        <th>Принять</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if delivery.delivery_items %}
+                    {% for item in delivery.delivery_items %}
+                    <tr>
+                        <td>{{ item.item_name }}</td>
+                        <td>{{ item.article_code }}</td>
+                        <td>
+                            {% if item.type == 'хрупкий' %}
+                            <span class="badge badge-warning">Хрупкий</span>
+                            {% elif item.type == 'жидкий' %}
+                            <span class="badge badge-primary">Жидкий</span>
+                            {% elif item.type == 'крупногабаритный' %}
+                            <span class="badge badge-info">Крупный</span>
+                            {% else %}
+                            {{ item.type }}
+                            {% endif %}
+                        </td>
+                        <td>{{ item.price }} ₽</td>
+                        <td>{{ item.weight }} кг</td>
+                        <td>{{ item.size }}</td>
+                        <td class="location-cell">
+                            {% if item.accepted %}
+                                {{ item.location_name }}
+                            {% else %}
+                                <span class="location-badge">Автоматически</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.accepted %}
+                                <span class="badge badge-success">Принят</span>
+                            {% else %}
+                                <span class="badge badge-warning">Ожидает</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if not item.accepted %}
+                            <button type="submit" 
+                                    name="accept_item" 
+                                    value="{{ loop.index0 }}" 
+                                    class="btn btn-sm btn-success">
+                                <i class="fas fa-check"></i> Принять
+                            </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center">Нет данных о товарах</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </form>
     {% else %}
     <div class="alert alert-warning">
         Нет данных о поставке

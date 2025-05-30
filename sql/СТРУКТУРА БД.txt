@@ -42,19 +42,20 @@ CREATE TABLE Items (
     size VARCHAR(50), -- пример: "30x30x40"
     item_type VARCHAR(30) CHECK (item_type IN ('хрупкий', 'жидкий', 'крупногабаритный')),
     status VARCHAR(20) DEFAULT 'accepted' CHECK (status IN ('accepted', 'shipped'))
+    created_date DATETIME DEFAULT GETDATE(),
+    supplier_id INT,
+    FOREIGN KEY (supplier_id) REFERENCES Suppliers(supplier_id);
+
 );
-ALTER TABLE Items ADD created_date DATETIME DEFAULT GETDATE();
 -- Каждая единица товара — отдельная запись
 
 -- 5. Ячейки склада
 CREATE TABLE Locations (
     location_id INT IDENTITY(1,1) PRIMARY KEY,
-    location_name VARCHAR(50) NOT NULL UNIQUE
+    location_name VARCHAR(50) NOT NULL UNIQUE,
+    location_type VARCHAR(30) 
+    CHECK (location_type IN ('хрупкий', 'жидкий', 'крупногабаритный', 'обычный'))
 );
---  Добавляем тип ячейки в таблицу Locations
-ALTER TABLE Locations ADD location_type VARCHAR(30) 
-CHECK (location_type IN ('хрупкий', 'жидкий', 'крупногабаритный', 'обычный'));
-
 -- Статус занятости будет рассчитываться через представление
 
 -- 6. Размещение товара в ячейку
@@ -67,11 +68,6 @@ CREATE TABLE Item_Locations (
     FOREIGN KEY (location_id) REFERENCES Locations(location_id)
 );
 -- Показывает, в какой ячейке находится товар
-
--- Добавляем ограничения на размещение товаров
-ALTER TABLE Item_Locations ADD CONSTRAINT FK_Item_Locations_Compatible 
-FOREIGN KEY (location_id) REFERENCES Locations(location_id);
-
 
 -- 7. Отгрузки (исходящие поставки)
 CREATE TABLE Outbound_Deliveries (
@@ -112,9 +108,6 @@ CREATE TABLE Inventory_Transactions (
 -- Outbound_Deliveries - отгрузка куда-либо, JSON-список отгружаемых товаров (валидный JSON)
 -- Inventory_Transactions - логирование всех действий пользователей
 
-
-
-
 -- Триггер для освобождения ячеек при удалении товара
 CREATE TRIGGER trg_after_item_delete
 ON Items
@@ -147,8 +140,6 @@ BEGIN
         ROLLBACK TRANSACTION;
     END
 END;
-
-
 
 -- 4. Создаем ячейки разных типов (пример)
 INSERT INTO Locations (location_name, location_type) VALUES

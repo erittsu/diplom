@@ -69,6 +69,7 @@ def receive_delivery(delivery_id):
     cursor = conn.cursor()
 
     try:
+        # Get delivery data
         cursor.execute("""
             SELECT item_list, supplier_id FROM Deliveries 
             WHERE delivery_id = ? AND status = 'pending'
@@ -81,7 +82,11 @@ def receive_delivery(delivery_id):
         items = json.loads(row.item_list)
         supplier_id = row.supplier_id
 
-        # свободные ячейки с группировкой по типу (ПРОЦЕДУРУ)
+        # Get selected items from form (only checked items)
+        accepted_indices = [int(i) for i in request.form.getlist('accept_item')]
+        items_to_accept = [items[i] for i in accepted_indices]
+
+        # Get free locations grouped by type
         cursor.execute("""
             SELECT location_id, location_type 
             FROM Locations
@@ -97,13 +102,14 @@ def receive_delivery(delivery_id):
                 free_locations[loc.location_type] = []
             free_locations[loc.location_type].append(loc.location_id)
 
-        for item in items:
+        # Process each accepted item
+        for item in items_to_accept:
             item_type = item['type']
             location_id = None
             
+            # Try to find matching location type first
             if item_type in free_locations and free_locations[item_type]:
                 location_id = free_locations[item_type].pop()
-
             elif 'обычный' in free_locations and free_locations['обычный']:
                 location_id = free_locations['обычный'].pop()
             
@@ -111,17 +117,7 @@ def receive_delivery(delivery_id):
                 conn.rollback()
                 return f"Нет доступной ячейки для товара типа: {item_type}", 400
 
-            # проверка совместимости
-            cursor.execute("""
-                SELECT location_type FROM Locations WHERE location_id = ?
-            """, (location_id,))
-            loc_type = cursor.fetchone().location_type
-            
-            if loc_type != 'обычный' and loc_type != item_type:
-                conn.rollback()
-                return f"Incompatible: item type {item_type} cannot be placed in location type {loc_type}", 400
-
-            # добавление товара в Items
+            # Add item to Items table
             cursor.execute("""
                 INSERT INTO Items (item_name, article_code, price, weight, size, 
                                  item_type, status, supplier_id)
@@ -138,25 +134,34 @@ def receive_delivery(delivery_id):
             
             new_item_id = cursor.execute("SELECT SCOPE_IDENTITY()").fetchone()[0]
             
-            # товар в Item_Locations
+            # Place item in location
             cursor.execute("""
                 INSERT INTO Item_Locations (item_id, location_id, placed_by)
                 VALUES (?, ?, ?)
             """, (new_item_id, location_id, session['user_id']))
             
-            # логи receive_delivery
+            # Log transaction
             cursor.execute("""
                 INSERT INTO Inventory_Transactions 
                 (user_id, item_id, location_id, transaction_type)
                 VALUES (?, ?, ?, 'receive_delivery')
             """, (session['user_id'], new_item_id, location_id))
 
-        # обновление статуса ПРИНЯТ
-        cursor.execute("""
-            UPDATE Deliveries 
-            SET status = 'received' 
-            WHERE delivery_id = ?
-        """, (delivery_id,))
+        # Update delivery status if all items were accepted
+        if len(accepted_indices) == len(items):
+            cursor.execute("""
+                UPDATE Deliveries 
+                SET status = 'received' 
+                WHERE delivery_id = ?
+            """, (delivery_id,))
+        else:
+            # If only some items were accepted, update the item_list in the delivery
+            remaining_items = [item for i, item in enumerate(items) if i not in accepted_indices]
+            cursor.execute("""
+                UPDATE Deliveries 
+                SET item_list = ?
+                WHERE delivery_id = ?
+            """, (json.dumps(remaining_items), delivery_id))
         
         conn.commit()
         
@@ -371,23 +376,129 @@ def staff_deliveries():
         current_sort=sort_by
     )
 
-@staff_bp.route('/deliveries/<int:delivery_id>')
+@staff_bp.route('/deliveries/<int:delivery_id>', methods=['GET', 'POST'])
 def staff_delivery_details(delivery_id):
     if 'user_id' not in session or session.get('role') != 'staff':
         return redirect('/login')
 
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
+    conn = None
+    cursor = None
     try:
-        # Получаем данные о поставке
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        if request.method == 'POST':
+            accept_index = request.form.get('accept_item')
+            if accept_index is not None:
+                accept_index = int(accept_index)
+                
+                cursor.execute("""
+                    SELECT item_list, supplier_id FROM Deliveries 
+                    WHERE delivery_id = ? AND status = 'pending'
+                """, (delivery_id,))
+                row = cursor.fetchone()
+                if not row:
+                    return render_template('staff/staff_delivery_details.html', 
+                                        error='Поставка не найдена или уже обработана',
+                                        delivery=None)
+
+                items = json.loads(row.item_list)
+                supplier_id = row.supplier_id
+
+                if 0 <= accept_index < len(items):
+                    item = items[accept_index]
+                    
+                    # Проверяем, не был ли уже принят этот товар
+                    if item.get('accepted', False):
+                        return redirect(url_for('staff.staff_delivery_details', delivery_id=delivery_id))
+                    
+                    cursor.execute("""
+                        SELECT TOP 1 location_id, location_name 
+                        FROM Locations
+                        WHERE location_id NOT IN (SELECT location_id FROM Item_Locations)
+                        AND (location_type = ? OR location_type = 'обычный')
+                        ORDER BY 
+                            CASE WHEN location_type = ? THEN 0 ELSE 1 END
+                    """, (item['type'], item['type']))
+                    
+                    location = cursor.fetchone()
+                    if not location:
+                        return render_template('staff/staff_delivery_details.html',
+                                            error=f"Нет доступной ячейки для товара типа: {item['type']}",
+                                            delivery=None)
+
+                    # Вставляем товар
+                    cursor.execute("""
+                        INSERT INTO Items (item_name, article_code, price, weight, size, 
+                                        item_type, status, supplier_id)
+                        OUTPUT INSERTED.item_id
+                        VALUES (?, ?, ?, ?, ?, ?, 'accepted', ?)
+                    """, (
+                        item['item_name'], 
+                        item['article_code'], 
+                        item['price'],
+                        item['weight'], 
+                        item['size'], 
+                        item['type'],
+                        supplier_id
+                    ))
+
+                    new_item_id_result = cursor.fetchone()
+                    if not new_item_id_result:
+                        conn.rollback()
+                        error_msg = "Ошибка при создании товара: не удалось получить ID нового товара"
+                        print(error_msg)
+                        return render_template('staff/staff_delivery_details.html',
+                                            error=error_msg,
+                                            delivery=None)
+                    new_item_id = new_item_id_result[0]
+
+                    # Размещаем товар
+                    cursor.execute("""
+                        INSERT INTO Item_Locations (item_id, location_id)
+                        VALUES (?, ?)
+                    """, (new_item_id, location.location_id))
+                    
+                    # Логируем операцию
+                    cursor.execute("""
+                        INSERT INTO Inventory_Transactions 
+                        (user_id, item_id, location_id, transaction_type)
+                        VALUES (?, ?, ?, 'receive_delivery')
+                    """, (session['user_id'], new_item_id, location.location_id))
+
+                    # Помечаем товар как принятый в списке поставки
+                    items[accept_index]['accepted'] = True
+                    items[accept_index]['location_id'] = location.location_id
+                    items[accept_index]['location_name'] = location.location_name
+                    
+                    # Обновляем список товаров в поставке
+                    cursor.execute("""
+                        UPDATE Deliveries 
+                        SET item_list = ?
+                        WHERE delivery_id = ?
+                    """, (json.dumps(items), delivery_id))
+                    
+                    # Проверяем, все ли товары приняты
+                    all_accepted = all(item.get('accepted', False) for item in items)
+                    if all_accepted:
+                        cursor.execute("""
+                            UPDATE Deliveries 
+                            SET status = 'received'
+                            WHERE delivery_id = ?
+                        """, (delivery_id,))
+                    
+                    conn.commit()
+                    return redirect(url_for('staff.staff_delivery_details', delivery_id=delivery_id))
+
+        # Получаем данные о поставке для GET-запроса
         cursor.execute("""
             SELECT 
                 D.delivery_id, 
                 S.supplier_name, 
                 FORMAT(D.delivery_date, 'dd.MM.yyyy') as delivery_date, 
                 D.status, 
-                D.item_list as items_json
+                D.item_list as items_json,
+                (SELECT COUNT(*) FROM OPENJSON(D.item_list)) as items_count
             FROM Deliveries D
             JOIN Suppliers S ON D.supplier_id = S.supplier_id
             WHERE D.delivery_id = ?
@@ -399,11 +510,10 @@ def staff_delivery_details(delivery_id):
                                 error='Поставка не найдена',
                                 delivery=None)
 
-        # Получаем названия колонок
+        # Обработка данных поставки
         columns = [column[0] for column in cursor.description]
         delivery = dict(zip(columns, row))
         
-        # Обработка JSON
         items = []
         json_error = None
         items_json = delivery.get('items_json', '[]')
@@ -417,6 +527,18 @@ def staff_delivery_details(delivery_id):
             json_error = f'Ошибка при чтении списка товаров: {str(e)}'
             print(f"JSON decode error: {e}\nOriginal JSON: {items_json}")
 
+        # Для уже принятых товаров получаем информацию о ячейках из базы
+        for item in items:
+            if item.get('accepted', False) and 'location_id' in item:
+                cursor.execute("""
+                    SELECT location_name 
+                    FROM Locations 
+                    WHERE location_id = ?
+                """, (item['location_id'],))
+                location = cursor.fetchone()
+                if location:
+                    item['location_name'] = location.location_name
+
         delivery_data = {
             'delivery_id': delivery.get('delivery_id'),
             'supplier_name': delivery.get('supplier_name'),
@@ -427,16 +549,22 @@ def staff_delivery_details(delivery_id):
             'items_json': items_json
         }
         
-        return render_template('staff/staff_delivery_details.html', 
-                            delivery=delivery_data,
-                            error=json_error)
+        template = render_template('staff/staff_delivery_details.html', 
+                                 delivery=delivery_data,
+                                 error=json_error)
+        return template
         
     except Exception as e:
+        if conn:
+            conn.rollback()
         return render_template('staff/staff_delivery_details.html',
                             error=f'Ошибка при обработке данных: {str(e)}',
                             delivery=None)
     finally:
-        conn.close()
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
         
 @staff_bp.route('/outbound')
 def staff_outbound():
