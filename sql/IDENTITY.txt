@@ -1,2 +1,5 @@
 # сброс счётчика IDENTITY 
 DBCC CHECKIDENT ('Таблица', RESEED, 0);
+
+BACKUP DATABASE BD TO DISK = 'C:\Users\Fialka\Desktop\backup\BD.bak' WITH FORMAT;
+GO
