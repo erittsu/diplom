@@ -1,124 +1,36 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Регистрация | Складской учет</title>
-    <style>
-        :root {
-            --primary-color: #3498db;
-            --secondary-color: #2980b9;
-            --background-color: #f5f7fa;
-            --card-color: #ffffff;
-            --text-color: #333333;
-            --error-color: #e74c3c;
-        }
-        
-        body {
-            background-color: var(--background-color);
-            color: var(--text-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        .register-container {
-            width: 100%;
-            max-width: 500px;
-            padding: 2rem;
-            background: var(--card-color);
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        }
-        
-        h2 {
-            text-align: center;
-            margin-bottom: 1.5rem;
-            color: var(--primary-color);
-        }
-        
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: #555;
-        }
-        
-        input, select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 1rem;
-            transition: border 0.3s;
-        }
-        
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-        }
-        
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        
-        button:hover {
-            background-color: var(--secondary-color);
-        }
-        
-        .footer {
-            text-align: center;
-            margin-top: 2rem;
-            font-size: 0.8rem;
-            color: #777;
-        }
-    </style>
-</head>
-<body>
-    <div class="register-container">
+{% extends "base.html" %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block body_class %}register-page{% endblock %}
+
+{% block container_class %}<div class="register-container">{% endblock %}
+
+{% block content %}
+    <div class="register-form">
         <h2>Регистрация нового пользователя</h2>
-        
-        <form method="POST" action="/register">
+        <form method="POST" action="{{ url_for('register') }}">
             <div class="form-group">
-                <label for="username">Логин</label>
-                <input type="text" id="username" name="username" required placeholder="Введите логин">
+                <label for="username">Имя пользователя:</label>
+                <input type="text" id="username" name="username" required>
             </div>
-            
             <div class="form-group">
-                <label for="password">Пароль</label>
-                <input type="password" id="password" name="password" required placeholder="Введите пароль">
+                <label for="password">Пароль:</label>
+                <input type="password" id="password" name="password" required>
             </div>
-            
             <div class="form-group">
-                <label for="role">Роль пользователя</label>
+                <label for="confirm_password">Подтвердите пароль:</label>
+                <input type="password" id="confirm_password" name="confirm_password" required>
+            </div>
+            <div class="form-group">
+                <label for="role">Роль:</label>
                 <select id="role" name="role" required>
-                    <option value="staff">Сотрудник склада</option>
-                    <option value="supplier">Поставщик</option>
+                    <option value="admin">Администратор</option>
+                    <option value="staff">Сотрудник</option>
                 </select>
             </div>
-            
-            <button type="submit">Зарегистрировать</button>
+            <button type="submit" class="register-btn">Зарегистрировать</button>
         </form>
-        
-        <div class="footer">
-            <p>Доступно только для администраторов системы</p>
-        </div>
+        <a href="{{ url_for('admin.admin_panel') }}" class="back-to-admin-btn">Назад к панели админа</a>
     </div>
-</body>
-</html>
+{% endblock %}
