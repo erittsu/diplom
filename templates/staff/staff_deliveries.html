@@ -2,60 +2,54 @@
 
 {% block staff_content %}
 <div class="staff-section">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Поставки</h2>
-        <div class="d-flex align-items-center">
-            <div class="btn-group filter-group mr-3">
-                <a href="{{ url_for('staff.staff_deliveries') }}?sort={{ current_sort }}"
-                   class="btn btn-sm filter-btn {% if not status_filter %}active{% endif %}">
-                    Все
+    <h2>Поставки</h2>
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div class="filter-group">
+            <a href="{{ url_for('staff.staff_deliveries') }}?sort={{ current_sort }}"
+               class="filter-btn {% if not status_filter %}active{% endif %}">
+                Все
+            </a>
+            <a href="{{ url_for('staff.staff_deliveries') }}?status=pending&sort={{ current_sort }}"
+               class="filter-btn {% if status_filter == 'pending' %}active{% endif %}">
+                Ожидающие
+            </a>
+            <a href="{{ url_for('staff.staff_deliveries') }}?status=received&sort={{ current_sort }}"
+               class="filter-btn {% if status_filter == 'received' %}active{% endif %}">
+                Принятые
+            </a>
+            <a href="{{ url_for('staff.staff_deliveries') }}?status=cancelled&sort={{ current_sort }}"
+               class="filter-btn {% if status_filter == 'cancelled' %}active{% endif %}">
+                Отменённые
+            </a>
+        </div>
+        
+        <div class="sort-dropdown">
+            <div class="sort-menu">
+                <a href="{{ url_for('staff.staff_deliveries', status=status_filter, sort='date_desc') }}" 
+                class="sort-item {% if current_sort == 'date_desc' %}active{% endif %}">
+                    Новые сначала
+                    <span class="sort-icon"></span>
                 </a>
-                <a href="{{ url_for('staff.staff_deliveries') }}?status=pending&sort={{ current_sort }}"
-                   class="btn btn-sm filter-btn {% if status_filter == 'pending' %}active{% endif %}">
-                    Ожидающие
+                <a href="{{ url_for('staff.staff_deliveries', status=status_filter, sort='date_asc') }}" 
+                class="sort-item {% if current_sort == 'date_asc' %}active{% endif %}">
+                    Старые сначала
+                    <span class="sort-icon"></span>
                 </a>
-                <a href="{{ url_for('staff.staff_deliveries') }}?status=received&sort={{ current_sort }}"
-                   class="btn btn-sm filter-btn {% if status_filter == 'received' %}active{% endif %}">
-                    Принятые
+                <a href="{{ url_for('staff.staff_deliveries', status=status_filter, sort='today') }}" 
+                class="sort-item {% if current_sort == 'today' %}active{% endif %}">
+                    Сегодня
+                    <span class="sort-icon"></span>
                 </a>
-                <a href="{{ url_for('staff.staff_deliveries') }}?status=cancelled&sort={{ current_sort }}"
-                   class="btn btn-sm filter-btn {% if status_filter == 'cancelled' %}active{% endif %}">
-                    Отменённые
+                <a href="{{ url_for('staff.staff_deliveries', status=status_filter, sort='week') }}" 
+                class="sort-item {% if current_sort == 'week' %}active{% endif %}">
+                    На этой неделе
+                    <span class="sort-icon"></span>
                 </a>
-            </div>
-                <div class="sort-dropdown">
-                    <button class="sort-toggle">
-                        <i class="fas fa-sort-amount-down-alt" style="font-size: 0.9rem; opacity: 0.7;"></i>
-                        Сортировка
-                    </button>
-                    <div class="sort-menu">
-                        <a href="{{ url_for('staff.staff_deliveries', status=status_filter, sort='date_desc') }}" 
-                        class="sort-item {% if current_sort == 'date_desc' %}active{% endif %}">
-                            Новые сначала
-                            <span class="sort-icon"></span>
-                        </a>
-                        <a href="{{ url_for('staff.staff_deliveries', status=status_filter, sort='date_asc') }}" 
-                        class="sort-item {% if current_sort == 'date_asc' %}active{% endif %}">
-                            Старые сначала
-                            <span class="sort-icon"></span>
-                        </a>
-                        <a href="{{ url_for('staff.staff_deliveries', status=status_filter, sort='today') }}" 
-                        class="sort-item {% if current_sort == 'today' %}active{% endif %}">
-                            Сегодня
-                            <span class="sort-icon"></span>
-                        </a>
-                        <a href="{{ url_for('staff.staff_deliveries', status=status_filter, sort='week') }}" 
-                        class="sort-item {% if current_sort == 'week' %}active{% endif %}">
-                            На этой неделе
-                            <span class="sort-icon"></span>
-                        </a>
-                        <a href="{{ url_for('staff.staff_deliveries', status=status_filter, sort='month') }}" 
-                        class="sort-item {% if current_sort == 'month' %}active{% endif %}">
-                            В этом месяце
-                            <span class="sort-icon"></span>
-                        </a>
-                    </div>
-                </div>
+                <a href="{{ url_for('staff.staff_deliveries', status=status_filter, sort='month') }}" 
+                class="sort-item {% if current_sort == 'month' %}active{% endif %}">
+                    В этом месяце
+                    <span class="sort-icon"></span>
+                </a>
             </div>
         </div>
     </div>
@@ -97,12 +91,12 @@
                     <td class="text-center">
                         <div class="action-buttons">
                             <a href="{{ url_for('staff.staff_delivery_details', delivery_id=delivery.delivery_id) }}"
-                               class="action-btn view-btn" title="Детали поставки">
+                            class="action-btn view-btn" title="Детали поставки">
                                 <i class="far fa-eye"></i>
                             </a>
                             {% if delivery.status == 'pending' %}
                             <form action="{{ url_for('staff.receive_delivery', delivery_id=delivery.delivery_id) }}"
-                                  method="POST" class="d-inline">
+                                method="POST" class="d-inline">
                                 <button type="submit" class="action-btn accept-btn" title="Принять поставку">
                                     <i class="fas fa-check"></i>
                                 </button>
@@ -126,4 +120,65 @@
         {% endif %}
     </div>                   
 </div>
+<style>
+/* Горизонтальная панель фильтров — на всех экранах */
+.filter-group {
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    padding: 4px 6px;
+    background-color: var(--card-color);
+    border-radius: 8px;
+    border: 1px solid var(--input-border);
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none; /* Firefox */
+}
+
+.filter-group::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+}
+
+.filter-btn {
+    display: inline-block;
+    border: 1px solid var(--input-border);
+    color: var(--text-color);
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    background-color: transparent;
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+    background-color: rgba(var(--primary-color-rgb), 0.05);
+    border-color: var(--primary-color);
+}
+
+.filter-btn.active {
+    background-color: rgba(var(--primary-color-rgb), 0.1);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+/* Удаляем лишнюю адаптацию, которая ломает горизонтальный вид */
+@media (max-width: 768px) {
+    .filter-group {
+        flex-wrap: nowrap !important;
+        justify-content: flex-start !important;
+        overflow-x: auto !important;
+    }
+
+    .filter-btn {
+        font-size: 0.8rem;
+        padding: 5px 10px;
+        margin: 0;
+    }
+}
+</style>
+
 {% endblock %}

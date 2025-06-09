@@ -1,8 +1,14 @@
-{% extends "staff/staff_panel.html" %}
+{% if session['role'] == 'staff' %}
+    {% extends "staff/staff_panel.html" %}
+{% elif session['role'] == 'supplier' %}
+    {% extends "supplier/supplier_panel.html" %}
+{% elif session['role'] == 'admin' %}
+    {% extends "admin/admin_panel.html" %}
+{% endif %}
 
 {% block title %}Личный кабинет - Складской учет{% endblock %}
 
-{% block staff_content %}
+{% block content %}
 <!-- Подключаем общие стили -->
 <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 <!-- Подключаем стили для профиля -->
@@ -114,61 +120,28 @@
                 </div>
             </div>
         </div>
-
-        <!-- Безопасность -->
-        <div class="profile-detail-card">
-            <div class="profile-card-header">
-                <i class="fas fa-shield-alt"></i>
-                <h3>Безопасность</h3>
-            </div>
-            <div class="profile-card-body">
-                <div class="profile-security-item">
-                    <div class="profile-security-icon">
-                        <i class="fas fa-lock"></i>
-                    </div>
-                    <div class="profile-security-info">
-                        <h4>Пароль</h4>
-                        <p>Последнее изменение: {{ session.get('password_changed', 'Неизвестно') }}</p>
-                    </div>
-                    <button class="profile-edit-btn">
-                        <i class="fas fa-pencil-alt"></i> Изменить
-                    </button>
-                </div>
-                <div class="profile-security-item">
-                    <div class="profile-security-icon">
-                        <i class="fas fa-mobile-alt"></i>
-                    </div>
-                    <div class="profile-security-info">
-                        <h4>Двухфакторная аутентификация</h4>
-                        <p>Не подключена</p>
-                    </div>
-                    <button class="profile-edit-btn">
-                        <i class="fas fa-plus-circle"></i> Подключить
-                    </button>
-                </div>
-            </div>
-        </div>
     </div>
 
-    <!-- Действия -->
-    <div class="profile-actions-panel">
-        <div class="profile-actions-header">
-            <i class="fas fa-cog"></i>
-            <h3>Действия</h3>
-        </div>
-        <div class="profile-action-buttons">
-            <button class="profile-action-btn">
-                <i class="fas fa-pencil-alt"></i> Редактировать профиль
-            </button>
-            <button class="profile-action-btn">
-                <i class="fas fa-bell"></i> Настройки уведомлений
-            </button>
-            <form action="{{ url_for('logout') }}" method="POST" class="profile-action-btn logout">
-                <button type="submit" class="profile-action-btn logout">
-                    <i class="fas fa-sign-out-alt"></i> Выйти
-                </button>
-            </form>
-        </div>
+<!-- Действия -->
+<div class="profile-actions-panel">
+    <div class="profile-actions-header">
+        <i class="fas fa-cog"></i>
+        <h3>Действия</h3>
     </div>
+    <div class="profile-action-buttons">
+        {% if session['role'] == 'staff' %}
+            <a href="/staff" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Назад
+            </a>
+        {% elif session['role'] == 'admin' %}
+            <a href="/admin" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Назад
+            </a>
+        {% elif session['role'] == 'supplier' %}
+            <a href="/supplier" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Назад
+            </a>
+        {% endif %}
+    </div
 </div>
 {% endblock %}

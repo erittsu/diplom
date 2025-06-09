@@ -2,28 +2,27 @@
 
 {% block staff_content %}
 <div class="staff-section">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Возвратные поставки</h2>
-        <div class="btn-group filter-group">
+    <h2>Возвратные поставки</h2>
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div class="filter-group">
             <a href="{{ url_for('staff.staff_outbound') }}"
-               class="btn btn-sm filter-btn {% if not status_filter %}active{% endif %}">
+            class="filter-btn {% if not status_filter %}active{% endif %}">
                 Все
             </a>
             <a href="{{ url_for('staff.staff_outbound') }}?status=preparing"
-               class="btn btn-sm filter-btn {% if status_filter == 'preparing' %}active{% endif %}">
+            class="filter-btn {% if status_filter == 'preparing' %}active{% endif %}">
                 В ожидании
             </a>
             <a href="{{ url_for('staff.staff_outbound') }}?status=shipped"
-               class="btn btn-sm filter-btn {% if status_filter == 'shipped' %}active{% endif %}">
+            class="filter-btn {% if status_filter == 'shipped' %}active{% endif %}">
                 Отправленные
             </a>
             <a href="{{ url_for('staff.staff_outbound') }}?status=returned"
-               class="btn btn-sm filter-btn {% if status_filter == 'returned' %}active{% endif %}">
+            class="filter-btn {% if status_filter == 'returned' %}active{% endif %}">
                 Возвраты
             </a>
         </div>
     </div>
-
     <div class="table-responsive">
         {% if outbounds %}
         <table class="staff-table">
@@ -54,11 +53,11 @@
                     </td>
                     <td class="text-center">
                         <div class="action-buttons">
-                            <a href="#" class="btn btn-sm action-btn view-btn" title="Детали">
+                            <a href="#" class="action-btn view-btn" title="Детали">
                                 <i class="far fa-eye"></i>
                             </a>
                             {% if outbound.status == 'preparing' %}
-                            <button class="btn btn-sm action-btn ship-btn" title="Отправить">
+                            <button class="action-btn ship-btn" title="Отправить">
                                 <i class="fas fa-paper-plane"></i>
                             </button>
                             {% endif %}
@@ -80,4 +79,65 @@
         {% endif %}
     </div>
 </div>
+<style>
+/* Горизонтальная панель фильтров — на всех экранах */
+.filter-group {
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    padding: 4px 6px;
+    background-color: var(--card-color);
+    border-radius: 8px;
+    border: 1px solid var(--input-border);
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none; /* Firefox */
+}
+
+.filter-group::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+}
+
+.filter-btn {
+    display: inline-block;
+    border: 1px solid var(--input-border);
+    color: var(--text-color);
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    background-color: transparent;
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+    background-color: rgba(var(--primary-color-rgb), 0.05);
+    border-color: var(--primary-color);
+}
+
+.filter-btn.active {
+    background-color: rgba(var(--primary-color-rgb), 0.1);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+/* Удаляем лишнюю адаптацию, которая ломает горизонтальный вид */
+@media (max-width: 768px) {
+    .filter-group {
+        flex-wrap: nowrap !important;
+        justify-content: flex-start !important;
+        overflow-x: auto !important;
+    }
+
+    .filter-btn {
+        font-size: 0.8rem;
+        padding: 5px 10px;
+        margin: 0;
+    }
+}
+</style>
+
 {% endblock %}

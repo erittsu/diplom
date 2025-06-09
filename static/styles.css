@@ -239,6 +239,309 @@ body {
     overflow-y: visible;
 }
 
+/* ==================== */
+/* АДМИН ПАНЕЛЬ */
+/* ==================== */
+
+/* Улучшение выравнивания таблицы */
+.staff-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.staff-table td, .staff-table th {
+    vertical-align: middle;
+    padding: 12px 15px;
+}
+
+.staff-table .action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* Улучшение отображения карточек метрик */
+.metrics-grid {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.metric-card {
+    height: 100%;
+}
+
+.metric-info h3 {
+    margin-bottom: 5px;
+}
+
+.metric-link {
+    display: inline-block;
+    margin-top: 10px;
+}
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        background-color: rgba(var(--primary-color-rgb), 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: var(--primary-color);
+        margin-right: 10px;
+    }
+    
+    .d-flex {
+        display: flex;
+    }
+    
+    .align-items-center {
+        align-items: center;
+    }
+    
+    .ms-3 {
+        margin-left: 1rem;
+    }
+    
+    .text-muted {
+        color: var(--placeholder-color);
+    }
+    
+    .font-weight-bold {
+        font-weight: 600;
+    }
+
+/* Контейнер админ панели */
+.staff-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Навигационная панель */
+.staff-navbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 12px 20px;
+    background-color: var(--card-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid var(--input-border);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.staff-navbar::-webkit-scrollbar {
+    display: none;
+}
+
+.nav-block {
+    display: flex;
+    gap: 8px;
+    padding: 8px;
+    background: rgba(var(--primary-color-rgb), 0.05);
+    border-radius: 8px;
+    margin-right: 10px;
+    border: 1px solid rgba(var(--primary-color-rgb), 0.1);
+}
+
+.nav-block:last-child {
+    margin-right: 0;
+}
+
+.nav-btn {
+    padding: 10px 18px;
+    border-radius: 6px;
+    background-color: transparent;
+    color: var(--text-color);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    font-weight: 500;
+    font-size: 0.95rem;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.nav-btn:hover {
+    background-color: rgba(var(--primary-color-rgb), 0.08);
+    border-color: rgba(var(--primary-color-rgb), 0.2);
+}
+
+.nav-btn.active {
+    background-color: rgba(var(--primary-color-rgb), 0.12);
+    border-color: rgba(var(--primary-color-rgb), 0.3);
+    color: var(--primary-color);
+}
+
+.nav-btn i {
+    color: var(--text-color);
+    font-size: 1rem;
+    transition: color 0.2s ease;
+}
+
+.nav-btn.active i,
+.nav-btn:hover i {
+    color: var(--primary-color);
+}
+
+/* Контент админ панели */
+.staff-content {
+    flex: 1;
+    width: 100%;
+}
+
+/* Приветственная секция */
+.welcome-section {
+    margin-bottom: 2rem;
+}
+
+.welcome-section h2 {
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+}
+
+.welcome-section p {
+    color: var(--placeholder-color);
+    margin-bottom: 1.5rem;
+}
+
+/* Метрики */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 25px;
+}
+
+.metric-card {
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    background-color: var(--card-color);
+    border: 1px solid var(--input-border);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+}
+
+.metric-inner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+}
+
+.metric-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+}
+
+.metric-info h3 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.metric-info p {
+    margin: 4px 0 0;
+    font-size: 0.95rem;
+    color: var(--placeholder-color);
+}
+
+.metric-link {
+    display: inline-block;
+    margin-top: 8px;
+    color: var(--primary-color);
+    font-weight: 500;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s ease;
+}
+
+.bg-primary .metric-icon {
+    background-color: rgba(var(--primary-color-rgb), 0.1);
+    color: var(--primary-color);
+}
+
+.bg-success .metric-icon {
+    background-color: rgba(var(--success-color-rgb), 0.1);
+    color: var(--success-color);
+}
+
+.bg-info .metric-icon {
+    background-color: rgba(var(--info-color-rgb), 0.1);
+    color: var(--info-color);
+}
+
+.bg-warning .metric-icon {
+    background-color: rgba(var(--warning-color-rgb), 0.1);
+    color: var(--warning-color);
+}
+
+/* Список активностей */
+.activity-list {
+    list-style: none;
+    padding: 0;
+}
+
+.activity-item {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--input-border);
+    display: flex;
+    gap: 15px;
+}
+
+.activity-time {
+    color: var(--placeholder-color);
+    min-width: 100px;
+    font-size: 0.9rem;
+}
+
+.activity-text {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-color);
+}
+
+/* Быстрые действия */
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+/* Адаптивность */
+@media (max-width: 1200px) {
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .quick-actions {
+        grid-template-columns: 1fr;
+    }
+}
+
 
 /* 3. ФОРМЫ И ЭЛЕМЕНТЫ УПРАВЛЕНИЯ */
 .form-group {

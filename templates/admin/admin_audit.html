@@ -1,0 +1,121 @@
+{% extends "admin/admin_panel.html" %}
+
+{% block staff_content %}
+<div class="staff-section">
+    <div class="audit-header-container">
+        <h2 class="audit-header">Журнал аудита</h2>
+        
+        <form method="get" class="audit-filter-form">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Период:</label>
+                    <div class="date-range-inputs">
+                        <input type="date" name="date_from" value="{{ date_from }}" class="form-control">
+                        <span class="date-separator">—</span>
+                        <input type="date" name="date_to" value="{{ date_to }}" class="form-control">
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Тип действия:</label>
+                    <select name="filter" class="form-control">
+                        <option value="all" {% if filter_type == 'all' %}selected{% endif %}>Все</option>
+                        <option value="login" {% if filter_type == 'login' %}selected{% endif %}>Входы/выходы</option>
+                        <option value="data_change" {% if filter_type == 'data_change' %}selected{% endif %}>Изменения данных</option>
+                        <option value="inventory" {% if filter_type == 'inventory' %}selected{% endif %}>Действия с инвентарем</option>
+                    </select>
+                </div>
+                
+                <div class="filter-buttons">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> Применить
+                    </button>
+                    <a href="?filter=all" class="btn btn-outline">
+                        <i class="fas fa-redo"></i> Сбросить
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <div class="table-container">
+        <table class="staff-table audit-table">
+            <thead>
+                <tr>
+                    <th style="width: 80px;">ID</th>
+                    <th style="width: 120px;">Пользователь</th>
+                    <th style="width: 150px;">Тип действия</th>
+                    <th>Описание</th>
+                    <th style="width: 150px;">Дата и время</th>
+                    <th style="width: 100px;">ID предмета</th>
+                    <th style="width: 100px;">ID локации</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in audit_logs %}
+                <tr>
+                    <td>{{ log.transaction_id }}</td>
+                    <td>{{ log.user_id }} ({{ log.username }})</td>
+                    <td>
+                        <span class="badge 
+                            {% if log.transaction_type in ['add', 'receive_delivery', 'create_delivery'] %}badge-success
+                            {% elif log.transaction_type in ['remove', 'ship', 'create_outbound'] %}badge-warning
+                            {% elif log.transaction_type == 'move' %}badge-info
+                            {% else %}badge-primary{% endif %}">
+                            {{ log.transaction_type }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if log.transaction_type == 'add' %}Добавление инвентаря
+                        {% elif log.transaction_type == 'remove' %}Удаление инвентаря
+                        {% elif log.transaction_type == 'move' %}Перемещение инвентаря
+                        {% elif log.transaction_type == 'ship' %}Отгрузка товара
+                        {% elif log.transaction_type == 'place' %}Размещение на складе
+                        {% elif log.transaction_type == 'receive_delivery' %}Прием поставки
+                        {% elif log.transaction_type == 'create_delivery' %}Создание поставки
+                        {% elif log.transaction_type == 'create_outbound' %}Создание отгрузки
+                        {% elif log.transaction_type == 'receive_outbound' %}Прием отгрузки
+                        {% else %}{{ log.transaction_type }}{% endif %}
+                    </td>
+                    <td>{{ log.transaction_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>{% if log.item_id %}{{ log.item_id }}{% else %}-{% endif %}</td>
+                    <td>{% if log.location_id %}{{ log.location_id }}{% else %}-{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <!-- Пагинация с учетом фильтров -->
+        <div class="pagination-container">
+            <div class="pagination">
+                {% if page > 1 %}
+                <a href="?page={{ page-1 }}&filter={{ filter_type }}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" 
+                   class="pagination-btn">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                {% endif %}
+                
+                {% for p in range(1, total_pages+1) %}
+                    {% if p == page %}
+                    <span class="pagination-btn active">{{ p }}</span>
+                    {% else %}
+                    <a href="?page={{ p }}&filter={{ filter_type }}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" 
+                       class="pagination-btn">{{ p }}</a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page < total_pages %}
+                <a href="?page={{ page+1 }}&filter={{ filter_type }}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" 
+                   class="pagination-btn">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                {% endif %}
+            </div>
+            <div class="pagination-info">
+                Показано {{ (page-1)*per_page+1 }}-{{ [page*per_page, total_items]|min }} из {{ total_items }} записей
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

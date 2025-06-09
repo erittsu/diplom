@@ -1,0 +1,113 @@
+<!-- admin_users.html -->
+{% extends "admin/admin_panel.html" %}
+
+{% block title %}Управление пользователями | Админ-панель{% endblock %}
+
+{% block staff_content %}
+<!-- Основной контент для страницы управления пользователями -->
+<div class="welcome-section">
+    <h2>Управление пользователями</h2>
+    <p>Здесь вы можете управлять учетными записями пользователей системы.</p>
+</div>
+
+<!-- Метрики пользователей -->
+<div class="metrics-grid">
+    <div class="metric-card bg-primary">
+        <div class="metric-inner">
+            <div class="metric-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="metric-info">
+                <h3>{{ users|length }}</h3>
+                <p>Всего пользователей</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="metric-card bg-success">
+        <div class="metric-inner">
+            <div class="metric-icon">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <div class="metric-info">
+                <h3>{{ users|selectattr('role', 'equalto', 'admin')|list|length }}</h3>
+                <p>Администраторов</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="metric-card bg-info">
+        <div class="metric-inner">
+            <div class="metric-icon">
+                <i class="fas fa-user-tie"></i>
+            </div>
+            <div class="metric-info">
+                <h3>{{ users|selectattr('role', 'equalto', 'staff')|list|length }}</h3>
+                <p>Персонала</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="metric-card bg-warning">
+        <div class="metric-inner">
+            <div class="metric-icon">
+                <i class="fas fa-truck"></i>
+            </div>
+            <div class="metric-info">
+                <h3>{{ users|selectattr('role', 'equalto', 'supplier')|list|length }}</h3>
+                <p>Поставщиков</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Карточка с таблицей пользователей -->
+<div class="card">
+    <div class="card-header">
+        <div class="panel-header">
+            <h3 class="card-title">Список пользователей</h3>
+            <div class="panel-actions">
+                <a href="{{ url_for('admin.register') }}" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i> Добавить пользователя
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        {% if users %}
+        <table class="staff-table bordered-table">
+            <thead>
+                <tr>
+                    <th width="10%">ID</th>
+                    <th width="30%">Имя пользователя</th>
+                    <th width="20%">Роль</th>
+                    <th width="20%">Дата регистрации</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.user_id }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>
+                        <span class="badge 
+                            {% if user.role == 'admin' %}badge-primary
+                            {% elif user.role == 'staff' %}badge-info
+                            {% else %}badge-warning{% endif %}">
+                            {{ user.role|capitalize }}
+                        </span>
+                    </td>
+                    <td>{{ user.registration_date.strftime('%d.%m.%Y') if user.registration_date else 'Н/Д' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-user-slash"></i> Нет пользователей для отображения
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

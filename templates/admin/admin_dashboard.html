@@ -1,0 +1,115 @@
+<!-- admin_dashboard.html -->
+{% extends "admin/admin_panel.html" %}
+
+{% block title %}Главная | Админ-панель{% endblock %}
+
+{% block staff_content %}
+<!-- Основной контент для главной страницы администратора -->
+<div class="welcome-section">
+    <h2>Добро пожаловать, Администратор!</h2>
+    <p>Здесь вы можете управлять системой складского учета. Последние обновления и важная информация ниже.</p>
+</div>
+
+<!-- Метрики системы -->
+<div class="metrics-grid">
+    <div class="metric-card bg-primary">
+        <div class="metric-inner">
+            <div class="metric-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="metric-info">
+                <h3>{{ active_users }}</h3>
+                <p>Пользователей</p>
+                <a href="{{ url_for('admin.admin_users') }}" class="metric-link">Управление</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="metric-card bg-success">
+        <div class="metric-inner">
+            <div class="metric-icon">
+                <i class="fas fa-truck"></i>
+            </div>
+            <div class="metric-info">
+                <h3>{{ total_deliveries }}</h3>
+                <p>Всего поставок</p>
+                <a href="{{ url_for('admin.admin_deliveries') }}" class="metric-link">Просмотр</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="metric-card bg-warning">
+        <div class="metric-inner">
+            <div class="metric-icon">
+                <i class="fas fa-shipping-fast"></i>
+            </div>
+            <div class="metric-info">
+                <h3>{{ total_outbound }}</h3>
+                <p>Всего отгрузок</p>
+                <a href="{{ url_for('admin.admin_outbound') }}" class="metric-link">Обработать</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="metric-card bg-info">
+        <div class="metric-inner">
+            <div class="metric-icon">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+            <div class="metric-info">
+                <h3>{{ audit_entries }}</h3>
+                <p>Записей в журнале</p>
+                <a href="{{ url_for('admin.admin_audit') }}" class="metric-link">Проверить</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Последние действия -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Последние действия в системе</h3>
+    </div>
+    <ul class="activity-list">
+        {% for action in recent_actions %}
+        <li class="activity-item">
+            <span class="activity-time">{{ action.transaction_date.strftime('%H:%M') }}</span>
+            <div class="activity-text">
+                {% if action.transaction_type == 'add' %}
+                    <i class="fas fa-plus-circle text-success"></i>
+                    Добавлен новый товар
+                {% elif action.transaction_type == 'remove' %}
+                    <i class="fas fa-minus-circle text-danger"></i>
+                    Товар удалён
+                {% elif action.transaction_type == 'move' %}
+                    <i class="fas fa-arrows-alt text-primary"></i>
+                    Товар перемещён
+                {% elif action.transaction_type == 'ship' %}
+                    <i class="fas fa-shipping-fast text-info"></i>
+                    Отгрузка товара
+                {% elif action.transaction_type == 'receive_delivery' %}
+                    <i class="fas fa-truck text-warning"></i>
+                    Получена поставка
+                {% elif action.transaction_type == 'create_delivery' %}
+                    <i class="fas fa-clipboard-check text-success"></i>
+                    Создана новая поставка
+                {% elif action.transaction_type == 'create_outbound' %}
+                    <i class="fas fa-box-open text-primary"></i>
+                    Создана новая отгрузка
+                {% else %}
+                    <i class="fas fa-info-circle text-secondary"></i>
+                    Действие: {{ action.transaction_type }}
+                {% endif %}
+            </div>
+        </li>
+        {% else %}
+        <li class="activity-item">
+            <div class="activity-text">
+                <i class="fas fa-info-circle text-secondary"></i>
+                Нет последних действий
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
