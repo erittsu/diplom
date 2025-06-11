@@ -12,6 +12,9 @@
     {% if request.path.startswith('/admin') %}
     <link rel="stylesheet" href="{{ url_for('static', filename='staff_styles.css') }}">
     {% endif %}
+    {% if request.path.startswith('/supplier') %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='staff_styles.css') }}">
+    {% endif %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
     <header class="header">

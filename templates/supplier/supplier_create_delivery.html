@@ -1,0 +1,280 @@
+{% extends "supplier/supplier_panel.html" %}
+
+{% block supplier_content %}
+<div class="staff-section">
+    <div class="panel-header">
+        <h1>Создание новой поставки</h1>
+        <p>Заполните форму для создания новой поставки на склад</p>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('supplier.create_delivery') }}">
+                <div class="form-group">
+                    <label for="supplier_name">Поставщик:</label>
+                    <input type="text" id="supplier_name" class="form-control" value="{{ supplier.supplier_name }}" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label for="delivery_date">Дата поставки:</label>
+                    <input type="date" id="delivery_date" name="delivery_date" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="delivery_items">Список товаров:</label>
+                    <div class="items-container">
+                        <div class="item-card">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label>Название товара</label>
+                                    <input type="text" class="form-control item-name" placeholder="Например: Бутылка воды" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Код артикула</label>
+                                    <input type="text" class="form-control article-code" placeholder="Например: BW123" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Тип товара</label>
+                                    <select class="form-control item-type" required>
+                                        <option value="обычный">Обычный</option>
+                                        <option value="хрупкий">Хрупкий</option>
+                                        <option value="жидкий">Жидкий</option>
+                                        <option value="крупногабаритный">Крупногабаритный</option>
+                                        <option value="мелкий">Мелкий</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="row mt-3">
+                                <div class="col-md-3">
+                                    <label>Цена (₽)</label>
+                                    <input type="number" step="0.01" class="form-control item-price" placeholder="100.00" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Вес (кг)</label>
+                                    <input type="number" step="0.1" class="form-control item-weight" placeholder="1.5" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Размер (см)</label>
+                                    <input type="text" class="form-control item-size" placeholder="30x30x40" required>
+                                </div>
+                                <div class="col-md-3 d-flex align-items-end">
+                                    <button type="button" class="btn btn-danger btn-sm remove-item" style="display: none;">
+                                        <i class="fas fa-trash"></i> Удалить
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="btn btn-outline-primary mt-3 add-item">
+                        <i class="fas fa-plus"></i> Добавить товар
+                    </button>
+                    
+                    <!-- Скрытое поле для JSON -->
+                    <input type="hidden" id="delivery_items" name="delivery_items" required>
+                    
+                    <small class="form-text text-muted">
+                        Добавьте все товары, которые будут в поставке. Минимум 1 товар.
+                    </small>
+                </div>
+                
+                <div class="form-actions mt-4">
+                    <a href="{{ url_for('supplier.supplier_deliveries') }}" class="btn btn-secondary mr-auto">
+                        <i class="fas fa-times"></i> Отмена
+                    </a>
+                    <button type="submit" class="btn btn-primary ml-auto">
+                        <i class="fas fa-save"></i> Создать поставку
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .items-container {
+        margin-bottom: 20px;
+    }
+    
+    .item-card {
+        background-color: var(--card-color);
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-left: 4px solid var(--primary-color);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .item-card:hover {
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+    
+    .item-card .row {
+        margin-bottom: 10px;
+    }
+    
+    .item-card label {
+        font-weight: 500;
+        color: var(--placeholder-color);
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+        display: block;
+    }
+    
+     /* Стили для кнопки добавления товара */
+    .add-item {
+        margin-top: 10px;
+        background-color: #e8f5e9; /* Светло-салатовый фон */
+        color: #2e7d32; /* Темно-зеленый текст */
+        border: 1px solid #c8e6c9; /* Светло-зеленая граница */
+        transition: all 0.3s ease;
+    }
+    
+    .add-item:hover {
+        background-color: #d4edda; /* Более темный салатовый при наведении */
+        color: #155724;
+        border-color: #c3e6cb;
+    }
+    
+    /* Стили для кнопки удаления */
+    .remove-item {
+        background-color: white;
+        color: #e74c3c; /* Красный текст */
+        border: 1px solid #f5c6cb;
+        margin-top: 15px; /* Сдвигаем кнопку ниже */
+        transition: all 0.3s ease;
+    }
+    
+    .remove-item:hover {
+        background-color: #f8d7da; /* Светло-красный при наведении */
+        color: #721c24;
+    }
+    
+    /* Стили для блока с кнопками действий */
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        padding-top: 20px;
+        border-top: 1px solid var(--input-border);
+    }
+    
+    /* Стили для кнопки создания поставки */
+    .btn-primary {
+        background: linear-gradient(135deg, #3498db, #2980b9); /* Красивый синий градиент */
+        color: white;
+        border: none;
+        padding: 10px 24px;
+        font-weight: 600;
+        box-shadow: 0 4px 6px rgba(52, 152, 219, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #2980b9, #3498db);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(52, 152, 219, 0.4);
+    }
+    
+    .btn-primary:active {
+        transform: translateY(0);
+    }
+    
+    /* Стили для кнопки отмены */
+    .btn-secondary {
+        background-color: #f8f9fa; /* Бело-серый фон */
+        color: #6c757d; /* Серый текст */
+        border: 1px solid #e2e8f0;
+        padding: 8px 16px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #e9ecef;
+        color: #5a6268;
+    }
+
+    /* Новые стили для выравнивания кнопок */
+    .mr-auto {
+        margin-right: auto;
+    }
+    
+    .ml-auto {
+        margin-left: auto;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Добавление нового товара
+    document.querySelector('.add-item').addEventListener('click', function() {
+        const itemRow = document.querySelector('.item-card').cloneNode(true);
+        const inputs = itemRow.querySelectorAll('input');
+        const select = itemRow.querySelector('select');
+        
+        // Очищаем значения
+        inputs.forEach(input => input.value = '');
+        select.value = 'обычный';
+        
+        // Показываем кнопку удаления
+        itemRow.querySelector('.remove-item').style.display = 'block';
+        
+        // Добавляем обработчик удаления
+        itemRow.querySelector('.remove-item').addEventListener('click', function() {
+            itemRow.remove();
+            updateItemsJson();
+        });
+        
+        // Добавляем обработчики изменения
+        inputs.forEach(input => input.addEventListener('input', updateItemsJson));
+        select.addEventListener('change', updateItemsJson);
+        
+        document.querySelector('.items-container').appendChild(itemRow);
+    });
+    
+    // Обработчик удаления для первого элемента (если он есть)
+    const firstRemoveBtn = document.querySelector('.remove-item');
+    if (firstRemoveBtn) {
+        firstRemoveBtn.style.display = 'none';
+    }
+    
+    // Обработчики изменения для первого элемента
+    document.querySelectorAll('.item-card input').forEach(input => {
+        input.addEventListener('input', updateItemsJson);
+    });
+    document.querySelector('.item-card select').addEventListener('change', updateItemsJson);
+    
+    // Функция обновления JSON
+    function updateItemsJson() {
+        const items = [];
+        const itemRows = document.querySelectorAll('.item-card');
+        
+        itemRows.forEach(row => {
+            const item = {
+                item_name: row.querySelector('.item-name').value,
+                article_code: row.querySelector('.article-code').value,
+                price: parseFloat(row.querySelector('.item-price').value) || 0,
+                weight: parseFloat(row.querySelector('.item-weight').value) || 0,
+                size: row.querySelector('.item-size').value,
+                type: row.querySelector('.item-type').value
+            };
+            
+            // Добавляем только если есть название
+            if (item.item_name) {
+                items.push(item);
+            }
+        });
+        
+        document.getElementById('delivery_items').value = JSON.stringify(items, null, 2);
+    }
+    
+    // Инициализация JSON при загрузке
+    updateItemsJson();
+});
+</script>
+{% endblock %}

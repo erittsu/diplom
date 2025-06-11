@@ -1,0 +1,55 @@
+{% extends "supplier/supplier_panel.html" %}
+
+{% block supplier_content %}
+<div class="panel-header">
+    <h1>Мои товары на складе</h1>
+    <p>Список всех ваших товаров, находящихся на складе</p>
+</div>
+
+{% if items %}
+    <div class="table-container">
+        <table class="staff-table">
+            <thead>
+                <tr>
+                    <th>ID товара</th>
+                    <th>Название</th>
+                    <th>Артикул</th>
+                    <th>Цена</th>
+                    <th>Статус</th>
+                    <th>Ячейка</th>
+                    <th>Дата добавления</th>
+                    <th>Действия</th>  <!-- Новая колонка -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.item_id }}</td>
+                    <td>{{ item.item_name }}</td>
+                    <td>{{ item.article_code }}</td>
+                    <td>{{ item.price }}</td>
+                    <td>
+                        <span class="status-badge status-{{ item.status }}">
+                            {{ item.status }}
+                        </span>
+                    </td>
+                    <td>{{ item.location_name if item.location_name else 'Не размещён' }}</td>
+                    <td>{{ item.created_date }}</td>
+                    <td>
+                        {% if item.status == 'accepted' %}
+                        <form method="POST" action="{{ url_for('supplier.mark_for_return', item_id=item.item_id) }}" style="display: inline;">
+                            <button type="submit" class="btn btn-sm btn-warning">Запросить возврат</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="empty-state">
+        <p>На складе нет ваших товаров.</p>
+    </div>
+{% endif %}
+{% endblock %}

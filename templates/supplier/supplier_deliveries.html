@@ -1,0 +1,164 @@
+{% extends "supplier/supplier_panel.html" %}
+
+{% block supplier_content %}
+<div class="panel-header">
+    <div>
+        <h1>Мои поставки</h1>
+        <p>История всех ваших поставок на склад</p>
+    </div>
+    <div class="panel-actions">
+        <a href="{{ url_for('supplier.create_delivery') }}" class="btn btn-primary">Добавить поставку</a>
+    </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div class="filter-group">
+        <a href="{{ url_for('supplier.supplier_deliveries') }}"
+           class="filter-btn {% if not status_filter %}active{% endif %}">
+            Все
+        </a>
+        <a href="{{ url_for('supplier.supplier_deliveries') }}?status=pending"
+           class="filter-btn {% if status_filter == 'pending' %}active{% endif %}">
+            Ожидающие
+        </a>
+        <a href="{{ url_for('supplier.supplier_deliveries') }}?status=received"
+           class="filter-btn {% if status_filter == 'received' %}active{% endif %}">
+            Принятые
+        </a>
+        <a href="{{ url_for('supplier.supplier_deliveries') }}?status=cancelled"
+           class="filter-btn {% if status_filter == 'cancelled' %}active{% endif %}">
+            Отменённые
+        </a>
+    </div>
+    
+    <form method="GET" action="{{ url_for('supplier.supplier_deliveries') }}" class="d-flex align-items-center gap-2">
+        <div class="filter-group">
+            <input type="date" id="start_date" name="start_date" class="form-control" value="{{ request.args.get('start_date') }}">
+            <input type="date" id="end_date" name="end_date" class="form-control" value="{{ request.args.get('end_date') }}">
+        </div>
+        <button type="submit" class="btn btn-primary">Применить</button>
+        <a href="{{ url_for('supplier.supplier_deliveries') }}" class="btn btn-outline">Сбросить</a>
+    </form>
+</div>
+
+{% if deliveries %}
+<div class="table-responsive">
+    <table class="staff-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Дата {% if current_sort == 'date_asc' %}↑{% else %}↓{% endif %}</th>
+                <th>Товаров</th>
+                <th>Статус</th>
+                <th class="text-center">Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for delivery in deliveries %}
+            <tr>
+                <td>
+                    <a href="{{ url_for('supplier.delivery_details', delivery_id=delivery.delivery_id) }}" 
+                    class="delivery-id-link">
+                    #{{ delivery.delivery_id }}
+                    </a>
+                </td>
+                <td>{{ delivery.delivery_date }}</td>
+                <td>{{ delivery.items_count }}</td>
+                <td>
+                    <span class="status-badge status-{{ delivery.status }}">
+                        {% if delivery.status == 'pending' %}Ожидает
+                        {% elif delivery.status == 'received' %}Принята
+                        {% elif delivery.status == 'cancelled' %}Отменена
+                        {% else %}{{ delivery.status }}{% endif %}
+                    </span>
+                </td>
+                <td class="text-center">
+                    <div class="action-buttons">
+                        <a href="{{ url_for('supplier.delivery_details', delivery_id=delivery.delivery_id) }}"
+                        class="action-btn view-btn" title="Детали поставки">
+                            <i class="far fa-eye"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <p>
+        {% if status_filter == 'pending' %}Нет ожидающих поставок
+        {% elif status_filter == 'received' %}Нет принятых поставок
+        {% elif status_filter == 'cancelled' %}Нет отменённых поставок
+        {% else %}Нет поставок{% endif %}
+    </p>
+</div>
+{% endif %}
+
+<style>
+.filter-group {
+    display: inline-flex; /* Изменено с flex на inline-flex */
+    flex-direction: row;
+    gap: 6px;
+    padding: 4px 6px;
+    background-color: var(--card-color);
+    border-radius: 8px;
+    border: 1px solid var(--input-border);
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+    width: auto; /* Добавлено для фиксированной ширины */
+    max-width: 100%; /* Ограничение максимальной ширины */
+}
+
+
+.filter-group::-webkit-scrollbar {
+    display: none;
+}
+
+.filter-btn {
+    display: inline-block;
+    border: 1px solid var(--input-border);
+    color: var(--text-color);
+    font-weight: 500;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    background-color: transparent;
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+    padding: 14px 12px; /* отступы */
+    line-height: 1.2; /* вертикальное выравнивание текста */
+}
+
+.filter-btn:hover {
+    background-color: rgba(var(--primary-color-rgb), 0.05);
+    border-color: var(--primary-color);
+}
+
+.filter-btn.active {
+    background-color: rgba(var(--primary-color-rgb), 0.1);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+
+@media (max-width: 768px) {
+    .filter-group {
+        flex-wrap: nowrap !important;
+        justify-content: flex-start !important;
+        overflow-x: auto !important;
+        width: auto; /* Сохраняем auto ширину на мобильных */
+    }
+
+    .filter-btn {
+        font-size: 0.8rem;
+        padding: 5px 10px;
+        margin: 0;
+    }
+
+}
+</style>
+{% endblock %}

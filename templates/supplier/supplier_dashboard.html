@@ -1,0 +1,90 @@
+{% extends "supplier/supplier_panel.html" %}
+
+{% block supplier_content %}
+<div class="welcome-section">
+    <h2>Добро пожаловать, {{ session['username'] }}!</h2>
+    <p class="text-muted">Сегодня: {{ current_date }}</p>
+</div>
+
+<div class="metrics-grid">
+    <div class="metric-card bg-primary">
+        <div class="metric-inner">
+            <div class="metric-icon">
+                <i class="fas fa-truck"></i>
+            </div>
+            <div class="metric-info">
+                <h3>{{ pending_deliveries_count }}</h3>
+                <p>Ожидают принятия</p>
+                <a href="{{ url_for('supplier.supplier_deliveries') }}" class="metric-link">
+                    Подробнее <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="metric-card bg-success">
+        <div class="metric-inner">
+            <div class="metric-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="metric-info">
+                <h3>{{ accepted_items_count }}</h3>
+                <p>Товаров принято</p>
+                <a href="{{  url_for('supplier.supplier_items') }}" class="metric-link">
+                    Подробнее <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="metric-card bg-info">
+        <div class="metric-inner">
+            <div class="metric-icon">
+                <i class="fas fa-box"></i>
+            </div>
+            <div class="metric-info">
+                <h3>{{ items_to_ship_count }}</h3>
+                <p>Товаров к отгрузке</p>
+                <a href="{{ url_for('supplier.supplier_items') }}" class="metric-link">
+                    Подробнее <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="metric-card bg-warning">
+        <div class="metric-inner">
+            <div class="metric-icon">
+                <i class="fas fa-undo"></i>
+            </div>
+            <div class="metric-info">
+                <h3>{{ returned_items_count }}</h3>
+                <p>Возвращено товаров</p>
+                <a href="{{ url_for('supplier.supplier_outbound') }}" class="metric-link">
+                    Подробнее <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card compact-activity">
+    <div class="card-header">
+        <h3 class="card-title">Последние поставки</h3>
+    </div>
+    <div class="card-body p-0">
+        <ul class="activity-list compact">
+            {% for delivery in recent_deliveries %}
+            <li class="activity-item">
+                <div class="activity-time text-center">{{ delivery.delivery_date.strftime('%d.%m') }}</div>
+                <div class="activity-text">
+                    <i class="fas fa-circle activity-dot status-{{ delivery.status }}"></i>
+                    <span>Поставка #{{ delivery.delivery_id }} - {{ delivery.status }}</span>
+                    
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

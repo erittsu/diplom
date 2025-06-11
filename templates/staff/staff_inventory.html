@@ -16,7 +16,6 @@
                     <th>Тип</th>
                     <th>Ячейка</th>
                     <th>Статус</th>
-                    <th class="text-center">Действия</th>
                 </tr>
             </thead>
             <tbody>
@@ -37,25 +36,6 @@
                         <span class="status-badge status-{{ item.status }}">
                             {{ item.status }}
                         </span>
-                    </td>
-                    <td class="text-center">
-                        <div class="action-buttons">
-                            <a href="#" class="btn btn-sm action-btn view-btn" title="Детали">
-                                <i class="far fa-eye"></i>
-                            </a>
-                            {% if not item.location_name %}
-                            <form action="{{ url_for('staff.place_item', item_id=item.item_id) }}" method="POST" class="d-inline">
-                                <button type="submit" class="btn btn-sm action-btn accept-btn" title="Разместить">
-                                    <i class="fas fa-archive"></i>
-                                </button>
-                            </form>
-                            {% endif %}
-                            <form action="{{ url_for('staff.return_item', item_id=item.item_id) }}" method="POST" class="d-inline">
-                                <button type="submit" class="btn btn-sm action-btn delete-btn" title="Вернуть">
-                                    <i class="fas fa-undo"></i>
-                                </button>
-                            </form>
-                        </div>
                     </td>
                 </tr>
                 {% endfor %}

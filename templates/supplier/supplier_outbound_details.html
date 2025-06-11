@@ -1,0 +1,125 @@
+{% extends "supplier/supplier_panel.html" %}
+
+{% block supplier_content %}
+<div class="staff-section">
+    <a href="{{ url_for('supplier.supplier_outbound') }}" class="back-btn-blue">
+        <i class="fas fa-arrow-left"></i> Назад к возвратам
+    </a>
+
+    {% if error %}
+    <div class="alert alert-danger mb-4">
+        <strong>Ошибка:</strong> {{ error }}
+        {% if delivery and delivery.item_list %}
+        <div class="json-raw-toggle">
+            <button class="btn btn-sm btn-outline-primary" type="button" data-toggle="collapse" data-target="#jsonRawData">
+                <i class="fas fa-code"></i> Показать сырые данные
+            </button>
+            <div class="json-raw-data collapse mt-2" id="jsonRawData">
+                <pre>{{ delivery.item_list }}</pre>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if delivery %}
+    <div class="delivery-header">
+        <div class="delivery-title">
+            <h2>Возвратная поставка #{{ delivery.outbound_id }}</h2>
+            <span class="status-badge status-{{ delivery.status }}">
+                {% if delivery.status == 'pending' %}Ожидает
+                {% elif delivery.status == 'shipped' %}Отправлен
+                {% elif delivery.status == 'received' %}Получен
+                {% else %}{{ delivery.status }}{% endif %}
+            </span>
+        </div>
+    </div>
+
+    <div class="delivery-meta-card">
+        <div class="meta-grid">
+            <div class="meta-item">
+                <div class="meta-label">Дата возврата</div>
+                <div class="meta-value">{{ delivery.delivery_date }}</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Количество товаров</div>
+                <div class="meta-value">{{ items | length }}</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Статус</div>
+                <div class="meta-value">
+                    {% if delivery.status == 'pending' %}Ожидает подтверждения
+                    {% elif delivery.status == 'shipped' %}Отправлен со склада
+                    {% elif delivery.status == 'received' %}Получен вами
+                    {% else %}{{ delivery.status }}{% endif %}
+                </div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Тип получателя</div>
+                <div class="meta-value">{{ delivery.recipient_type }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-header">
+        <i class="fas fa-boxes"></i>
+        <h4>Список товаров</h4>
+    </div>
+
+<div class="table-responsive">
+        <table class="delivery-items-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Артикул</th>
+                    <th>Название</th>
+                    <th>Тип</th>
+                    <th>Размер</th>
+                    <th>Вес (кг)</th>
+                    <th>Цена (₽)</th>
+                    <th>Статус</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.product_id }}</td>
+                    <td>{{ item.article_code }}</td>
+                    <td>{{ item.product_name }}</td>
+                    <td>{{ item.item_type }}</td>
+                    <td>{{ item.size }}</td>
+                    <td>{{ item.weight }}</td>
+                    <td>{{ item.price }}</td>
+                    <td>
+                        {% if item.status == 'accepted' %}
+                            <span class="badge badge-warning">Принят</span>
+                        {% elif item.status == 'shipped' %}
+                            <span class="badge badge-info">Отправлен</span>
+                        {% elif item.status == 'to send' or not item.status %}
+                            <span class="badge badge-primary">К отправке</span>
+                        {% else %}
+                            <span class="badge badge-secondary">{{ item.status }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if delivery.status == 'pending' %}
+    <div class="delivery-actions mt-4">
+        <form action="{{ url_for('supplier.cancel_outbound', outbound_id=delivery.outbound_id) }}" method="POST" class="d-inline">
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-times"></i> Отменить возврат
+            </button>
+        </form>
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="alert alert-warning">
+        Нет данных о возвратной поставке
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

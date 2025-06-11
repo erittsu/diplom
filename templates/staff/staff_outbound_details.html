@@ -1,0 +1,161 @@
+{% extends "staff/staff_panel.html" %}
+
+{% block staff_content %}
+<div class="staff-section">
+    <!-- Back button -->
+    <a href="{{ url_for('staff.staff_outbound') }}" class="back-btn-blue">
+        <i class="fas fa-arrow-left"></i> Назад к возвратным поставкам
+    </a>
+
+    {% if error %}
+    <div class="alert alert-danger mb-4">
+        <strong>Ошибка:</strong> {{ error }}
+    </div>
+    {% endif %}
+
+    {% if outbound %}
+    <div class="delivery-header">
+        <div class="delivery-title">
+            <h2>Возвратная поставка #{{ outbound.outbound_id }}</h2>
+        </div>
+        <span class="status-badge status-{{ outbound.status }}">
+            {% if outbound.status == 'preparing' %}Подготовка
+            {% elif outbound.status == 'shipped' %}Отправлено
+            {% elif outbound.status == 'returned' %}Возврат
+            {% elif outbound.status == 'cancelled' %}Отменена
+            {% else %}{{ outbound.status }}{% endif %}
+        </span>
+    </div>
+
+    <!-- Outbound metadata -->
+    <div class="delivery-meta-card">
+        <div class="meta-grid">
+            <div class="meta-item">
+                <div class="meta-label">Адрес назначения</div>
+                <div class="meta-value">{{ outbound.destination_address }}</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Дата отгрузки</div>
+                <div class="meta-value">{{ outbound.delivery_date }}</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Получатель</div>
+                <div class="meta-value">
+                    {% if outbound.recipient_name %}
+                        {{ outbound.recipient_name }} ({{ outbound.recipient_type }})
+                    {% else %}
+                        {{ outbound.recipient_type }}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Контакты</div>
+                <div class="meta-value">{{ outbound.contact_info or 'Не указаны' }}</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Товаров</div>
+                <div class="meta-value">{{ outbound.items_count }}</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Статус</div>
+                <div class="meta-value">
+                    {% if outbound.status == 'preparing' %}Готовится к отправке
+                    {% elif outbound.status == 'shipped' %}Отправлена
+                    {% elif outbound.status == 'returned' %}Возвращена поставщику
+                    {% elif outbound.status == 'cancelled' %}Отменена
+                    {% else %}{{ outbound.status }}{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Items list header -->
+    <div class="section-header">
+        <i class="fas fa-boxes"></i>
+        <h4>Товары для возврата</h4>
+    </div>
+    
+    <!-- Items table -->
+    <div class="table-responsive">
+        <table class="delivery-items-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Название</th>
+                    <th>Артикул</th>
+                    <th>Тип</th>
+                    <th>Цена</th>
+                    <th>Вес</th>
+                    <th>Размер</th>
+                    <th>Поставщик</th>
+                    <th>Ячейка</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if outbound.items %}
+                {% for item in outbound['items'] %}
+                <tr>
+                    <td>{{ item.item_id }}</td>
+                    <td>{{ item.item_name }}</td>
+                    <td>{{ item.article_code }}</td>
+                    <td>
+                        {% if item.item_type == 'хрупкий' %}
+                        <span class="badge badge-warning">Хрупкий</span>
+                        {% elif item.item_type == 'жидкий' %}
+                        <span class="badge badge-primary">Жидкий</span>
+                        {% elif item.item_type == 'крупногабаритный' %}
+                        <span class="badge badge-info">Крупный</span>
+                        {% else %}
+                        <span class="badge badge-secondary">{{ item.item_type }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ item.price }} ₽</td>
+                    <td>{{ item.weight }} кг</td>
+                    <td>{{ item.size }}</td>
+                    <td>
+                        {% if item.supplier_name %}
+                            {{ item.supplier_name }}
+                        {% else %}
+                            <span class="text-muted">Не указан</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if item.location_name %}
+                            {{ item.location_name }}
+                        {% else %}
+                            <span class="text-muted">Не размещён</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="9" class="text-center">Нет данных о товарах</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="mt-4">
+        {% if outbound.status == 'preparing' %}
+        <form method="POST" action="{{ url_for('staff.ship_outbound', outbound_id=outbound.outbound_id) }}" class="d-inline">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i> Подтвердить отправку
+            </button>
+        </form>
+        <form method="POST" action="{{ url_for('staff.cancel_outbound', outbound_id=outbound.outbound_id) }}" class="d-inline ml-2">
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-times"></i> Отменить отправку
+            </button>
+        </form>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="alert alert-warning">
+        Нет данных о возвратной поставке
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

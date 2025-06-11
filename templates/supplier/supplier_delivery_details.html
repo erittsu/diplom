@@ -1,0 +1,393 @@
+{% extends "supplier/supplier_panel.html" %}
+
+{% block supplier_content %}
+<div class="staff-section">
+    <!-- Кнопка "Назад" -->
+    <a href="{{ url_for('supplier.supplier_deliveries') }}" class="back-btn-blue">
+        <i class="fas fa-arrow-left"></i> Назад к поставкам
+    </a>
+
+    {% if error %}
+    <div class="alert alert-danger mb-4">
+        <strong>Ошибка:</strong> {{ error }}
+        {% if delivery and delivery.items_json %}
+        <div class="json-raw-toggle">
+            <button class="btn btn-sm btn-outline-primary" type="button" data-toggle="collapse" data-target="#jsonRawData">
+                <i class="fas fa-code"></i> Показать сырые данные
+            </button>
+            <div class="json-raw-data collapse mt-2" id="jsonRawData">
+                <pre>{{ delivery.items_json }}</pre>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if delivery %}
+    <div class="delivery-header">
+        <div class="delivery-title">
+            <h2>Поставка #{{ delivery.delivery_id }}</h2>
+            <span class="status-badge status-{{ delivery.status }}">
+                {% if delivery.status == 'pending' %}Ожидает
+                {% elif delivery.status == 'received' %}Принята
+                {% elif delivery.status == 'cancelled' %}Отменена
+                {% else %}{{ delivery.status }}{% endif %}
+            </span>
+        </div>
+    </div>
+
+    <!-- Блок с метаданными поставки -->
+    <div class="delivery-meta-card">
+        <div class="meta-grid">
+            <div class="meta-item">
+                <div class="meta-label">Дата поставки</div>
+                <div class="meta-value">{{ delivery.delivery_date }}</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Товаров</div>
+                <div class="meta-value">{{ delivery.items_count }}</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Статус</div>
+                <div class="meta-value">
+                    {% if delivery.status == 'pending' %}Ожидает
+                    {% elif delivery.status == 'received' %}Принята на склад
+                    {% elif delivery.status == 'cancelled' %}Отменена
+                    {% else %}{{ delivery.status }}{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Заголовок списка товаров с иконкой -->
+    <div class="section-header">
+        <i class="fas fa-boxes"></i>
+        <h4>Список товаров</h4>
+    </div>
+    
+    <!-- Таблица товаров -->
+    <div class="table-responsive">
+        <table class="delivery-items-table">
+            <thead>
+                <tr>
+                    <th>Название</th>
+                    <th>Артикул</th>
+                    <th>Тип</th>
+                    <th>Цена</th>
+                    <th>Вес</th>
+                    <th>Размер</th>
+                    <th>Ячейка</th>
+                    <th>Статус</th>
+                </tr>
+            </thead>
+                <tbody>
+                    {% for item in delivery_items %}
+                    <tr>
+                        <td>{{ item.item_name }}</td>
+                        <td>{{ item.article_code }}</td>
+                        <td>
+                            {% if item.type == 'хрупкий' %}
+                            <span class="badge badge-warning">Хрупкий</span>
+                            {% elif item.type == 'жидкий' %}
+                            <span class="badge badge-primary">Жидкий</span>
+                            {% elif item.type == 'крупногабаритный' %}
+                            <span class="badge badge-info">Крупный</span>
+                            {% else %}
+                            {{ item.type }}
+                            {% endif %}
+                        </td>
+                        <td>{{ item.price }} ₽</td>
+                        <td>{{ item.weight }} кг</td>
+                        <td>{{ item.size }}</td>
+                        <td class="location-cell">
+                            {% if item.accepted %}
+                                {{ item.location_name }}
+                            {% else %}
+                                <span class="location-badge">Не размещено</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if delivery.status == 'cancelled' %}
+                                <span class="badge badge-danger">Отменён</span>
+                            {% elif item.accepted %}
+                                <span class="badge badge-success">Принят</span>
+                            {% else %}
+                                <span class="badge badge-warning">Ожидает</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+        </table>
+    </div>
+
+    {% if delivery.status == 'pending' %}
+    <div class="delivery-actions mt-4">
+        <form action="{{ url_for('supplier.cancel_delivery', delivery_id=delivery.delivery_id) }}" method="POST" class="d-inline">
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-times"></i> Отменить поставку
+            </button>
+        </form>
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="alert alert-warning">
+        Нет данных о поставке
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.back-btn-blue {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background-color: rgba(var(--primary-color-rgb), 0.1);
+    color: var(--primary-color);
+    border: 1px solid rgba(var(--primary-color-rgb), 0.3);
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    margin-bottom: 20px;
+}
+
+.back-btn-blue:hover {
+    background-color: rgba(var(--primary-color-rgb), 0.2);
+    text-decoration: none;
+}
+
+.delivery-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.delivery-title {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.delivery-title h2 {
+    margin: 0;
+    font-size: 1.75rem;
+    color: var(--heading-color);
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.status-pending { 
+    background-color: rgba(255, 193, 7, 0.2); 
+    color: var(--warning-color); 
+}
+
+.status-received { 
+    background-color: rgba(40, 167, 69, 0.2); 
+    color: var(--success-color); 
+}
+
+.status-cancelled { 
+    background-color: rgba(220, 53, 69, 0.2); 
+    color: var(--error-color); 
+}
+
+.delivery-meta-card {
+    background-color: var(--meta-card-bg);
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0 25px;
+    border-left: 4px solid var(--primary-color);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.meta-item {
+    padding: 10px;
+}
+
+.meta-label {
+    font-size: 0.95rem;
+    color: var(--meta-label-color);
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.meta-value {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--meta-value-color);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 25px 0 15px;
+}
+
+.section-header h4 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--text-color);
+}
+
+.delivery-items-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 0;
+    background-color: var(--card-color);
+    border-radius: 8px;
+    overflow: hidden;
+    min-width: 600px;
+}
+
+.delivery-items-table th {
+    background-color: var(--table-header-bg);
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--table-header-text);
+    border-bottom: 2px solid var(--table-border);
+    vertical-align: middle;
+}
+
+.delivery-items-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--table-border);
+    vertical-align: middle;
+    color: var(--text-color);
+}
+
+.delivery-items-table tr:last-child td {
+    border-bottom: none;
+}
+
+.badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.badge-warning {
+    background-color: rgba(255, 193, 7, 0.2);
+    color: var(--warning-color);
+}
+
+.badge-primary {
+    background-color: rgba(13, 110, 253, 0.2);
+    color: var(--primary-color);
+}
+
+.badge-info {
+    background-color: rgba(23, 162, 184, 0.2);
+    color: var(--info-color);
+}
+
+.badge-success {
+    background-color: rgba(40, 167, 69, 0.2);
+    color: var(--success-color);
+}
+
+.location-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: rgba(var(--info-color-rgb), 0.1);
+    color: var(--info-color);
+    border-radius: 12px;
+    font-size: 0.9rem;
+}
+
+.location-cell {
+    color: var(--placeholder-color);
+    font-style: italic;
+}
+
+.delivery-actions {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--input-border);
+    text-align: right;
+}
+
+.json-raw-toggle {
+    margin-top: 10px;
+}
+
+.json-raw-data pre {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 4px;
+    overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+    .delivery-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .meta-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .meta-item {
+        padding: 12px 0;
+    }
+    
+    .delivery-items-table {
+        font-size: 0.9rem;
+        min-width: auto;
+        display: block;
+        overflow-x: auto;
+    }
+    
+    .delivery-items-table th,
+    .delivery-items-table td {
+        padding: 8px 12px;
+        white-space: nowrap;
+    }
+
+    .delivery-meta-card {
+        padding: 15px;
+    }
+
+    .meta-item {
+        padding: 12px 0;
+    }
+    
+    .meta-label {
+        font-size: 0.85rem;
+    }
+    
+    .meta-value {
+        font-size: 1rem;
+    }
+
+    .badge {
+        padding: 4px 8px;
+        font-size: 0.8rem;
+    }
+}
+</style>
+{% endblock %}

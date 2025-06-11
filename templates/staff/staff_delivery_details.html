@@ -51,6 +51,15 @@
                 <div class="meta-label">Товаров</div>
                 <div class="meta-value">{{ delivery.items_count }}</div>
             </div>
+            <div class="meta-item">
+                <div class="meta-label">Статус</div>
+                <div class="meta-value">
+                    {% if delivery.status == 'pending' %}Ожидает приёмки
+                    {% elif delivery.status == 'received' %}Полностью принята
+                    {% elif delivery.status == 'cancelled' %}Отменена поставщиком
+                    {% else %}{{ delivery.status }}{% endif %}
+                </div>
+            </div>
         </div>
     </div>
     
@@ -60,8 +69,10 @@
         <h4>Список товаров</h4>
     </div>
     
-    <!-- Форма для приёмки товаров -->
+    <!-- Форма для приёмки товаров (только для pending статуса) -->
+    {% if delivery.status == 'pending' %}
     <form method="POST">
+    {% endif %}
         <!-- Таблица товаров -->
         <div class="table-responsive">
             <table class="delivery-items-table">
@@ -75,7 +86,9 @@
                         <th>Размер</th>
                         <th>Ячейка</th>
                         <th>Статус</th>
+                        {% if delivery.status == 'pending' %}
                         <th>Принять</th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody>
@@ -92,26 +105,39 @@
                             {% elif item.type == 'крупногабаритный' %}
                             <span class="badge badge-info">Крупный</span>
                             {% else %}
-                            {{ item.type }}
+                            <span class="badge badge-secondary">{{ item.type }}</span>
                             {% endif %}
                         </td>
                         <td>{{ item.price }} ₽</td>
                         <td>{{ item.weight }} кг</td>
                         <td>{{ item.size }}</td>
                         <td class="location-cell">
-                            {% if item.accepted %}
+                            {% if delivery.status == 'received' and item.accepted %}
                                 {{ item.location_name }}
+                            {% elif delivery.status == 'cancelled' %}
+                                <span class="text-muted">-</span>
                             {% else %}
-                                <span class="location-badge">Автоматически</span>
+                                <span class="location-badge">
+                                    {% if item.accepted %}
+                                        {{ item.location_name }}
+                                    {% else %}
+                                        Автоматически
+                                    {% endif %}
+                                </span>
                             {% endif %}
                         </td>
                         <td>
-                            {% if item.accepted %}
+                            {% if delivery.status == 'cancelled' %}
+                                <span class="badge badge-danger">Отменён</span>
+                            {% elif item.accepted %}
                                 <span class="badge badge-success">Принят</span>
+                            {% elif delivery.status == 'received' %}
+                                <span class="badge badge-secondary">Не принят</span>
                             {% else %}
                                 <span class="badge badge-warning">Ожидает</span>
                             {% endif %}
                         </td>
+                        {% if delivery.status == 'pending' %}
                         <td class="text-center">
                             {% if not item.accepted %}
                             <button type="submit" 
@@ -120,19 +146,24 @@
                                     class="btn btn-sm btn-success">
                                 <i class="fas fa-check"></i> Принять
                             </button>
+                            {% else %}
+                            <span class="text-success"><i class="fas fa-check-circle"></i></span>
                             {% endif %}
                         </td>
+                        {% endif %}
                     </tr>
                     {% endfor %}
                     {% else %}
                     <tr>
-                        <td colspan="9" class="text-center">Нет данных о товарах</td>
+                        <td colspan="{% if delivery.status == 'pending' %}9{% else %}8{% endif %}" class="text-center">Нет данных о товарах</td>
                     </tr>
                     {% endif %}
                 </tbody>
             </table>
         </div>
+    {% if delivery.status == 'pending' %}
     </form>
+    {% endif %}
     {% else %}
     <div class="alert alert-warning">
         Нет данных о поставке

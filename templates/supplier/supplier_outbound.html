@@ -1,0 +1,113 @@
+{% extends "supplier/supplier_panel.html" %}
+
+{% block supplier_content %}
+<div class="panel-header">
+    <div class="title-group">
+        <h1>Возвратные поставки</h1>
+        <p>Товары, возвращаемые вам со склада</p>
+    </div>
+    <div class="panel-actions">
+        <a href="{{ url_for('supplier.create_outbound') }}" class="btn btn-primary">
+            <i class="fas fa"></i>Создать возврат
+        </a>
+    </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="filter-group d-flex gap-2">
+        <a href="{{ url_for('supplier.supplier_outbound') }}"
+           class="filter-btn {% if not status_filter %}active{% endif %}">
+            Все
+        </a>
+        <a href="{{ url_for('supplier.supplier_outbound') }}?status=pending"
+           class="filter-btn {% if status_filter == 'pending' %}active{% endif %}">
+            Ожидающие
+        </a>
+        <a href="{{ url_for('supplier.supplier_outbound') }}?status=shipped"
+           class="filter-btn {% if status_filter == 'shipped' %}active{% endif %}">
+            Отправленные
+        </a>
+        <a href="{{ url_for('supplier.supplier_outbound') }}?status=received"
+           class="filter-btn {% if status_filter == 'received' %}active{% endif %}">
+            Полученные
+        </a>
+    </div>
+    
+    <form method="GET" action="{{ url_for('supplier.supplier_outbound') }}" class="d-flex align-items-center gap-2">
+        <input type="date" id="start_date" name="start_date" class="form-control" value="{{ request.args.get('start_date') }}">
+        <input type="date" id="end_date" name="end_date" class="form-control" value="{{ request.args.get('end_date') }}">
+        <button type="submit" class="btn btn-primary">Применить</button>
+        <a href="{{ url_for('supplier.supplier_outbound') }}" class="btn btn-outline">Сбросить</a>
+    </form>
+</div>
+
+
+{% if outbound_deliveries %}
+    <div class="table-responsive">
+        <table class="staff-table">
+            <thead>
+                <tr>
+                    <th>ID возврата</th>
+                    <th>Дата {% if current_sort == 'date_asc' %}↑{% else %}↓{% endif %}</th>
+                    <th>Товаров</th>
+                    <th>Статус</th>
+                    <th class="text-center">Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for delivery in outbound_deliveries %}
+                <tr>
+                    <td>
+                        <a href="{{ url_for('supplier.outbound_details', outbound_id=delivery.outbound_id) }}" class="delivery-id-link">
+                            #{{ delivery.outbound_id }}
+                        </a>
+                    </td>
+                    <td>{{ delivery.delivery_date }}</td>
+                    <td>{{ delivery.items_count }}</td>
+                    <td>
+                        <span class="status-badge status-{{ delivery.status }}">
+                            {% if delivery.status == 'pending' %}Ожидает
+                            {% elif delivery.status == 'shipped' %}Отправлен
+                            {% elif delivery.status == 'received' %}Получен
+                            {% else %}{{ delivery.status }}{% endif %}
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        <div class="action-buttons">
+                            <a href="{{ url_for('supplier.outbound_details', outbound_id=delivery.outbound_id) }}"
+                            class="action-btn view-btn" title="Детали возврата">
+                                <i class="far fa-eye"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="empty-state">
+        <p>
+            {% if status_filter == 'pending' %}Нет ожидающих возвратов
+            {% elif status_filter == 'shipped' %}Нет отправленных возвратов
+            {% elif status_filter == 'received' %}Нет полученных возвратов
+            {% else %}Нет возвратных поставок{% endif %}
+        </p>
+    </div>
+{% endif %}
+        <style>
+.filter-group {
+    display: flex !important; /* принудительно */
+    flex-direction: row !important;
+    gap: 0.5rem; /* отступы между кнопками */
+    flex-wrap: nowrap; /* запретить перенос */
+}
+
+.filter-btn {
+    display: inline-block !important; /* чтобы не занимали всю ширину */
+    width: auto !important; /* убрать 100% ширину если есть */
+    margin-right: 0 !important; /* убрать отступы margin, мы используем gap */
+}
+
+        </style>
+{% endblock %}

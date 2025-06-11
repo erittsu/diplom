@@ -1,0 +1,166 @@
+{% extends "supplier/supplier_panel.html" %}
+
+{% block supplier_content %}
+<div class="panel-header d-flex align-items-center justify-content-between mb-4">
+    <a href="{{ url_for('supplier.supplier_outbound') }}" class="btn btn-outline">
+        ← Назад к возвратным поставкам
+    </a>
+    <div>
+        <h1 class="h3 mb-1">Создать возвратную поставку</h1>
+        <p class="text-muted mb-0">Выберите товары для возврата на ваш склад</p>
+    </div>
+</div>
+
+<form method="POST" action="{{ url_for('supplier.create_outbound') }}" class="card p-4 shadow-sm">
+    <div class="form-section mb-4">
+        <label for="recipient_type" class="form-label fw-semibold">Тип получателя</label>
+        <select class="form-select" id="recipient_type" name="recipient_type" required>
+            <option value="supplier">Поставщику (владельцу товаров)</option>
+            <option value="other warehouse">Другому складу</option>
+            <option value="client">Клиенту</option>
+        </select>
+    </div>
+
+    <div class="form-section mb-4">
+        <label for="destination_address" class="form-label fw-semibold">Адрес доставки</label>
+        <input type="text" class="form-control" id="destination_address" name="destination_address" required>
+    </div>
+
+    <div class="form-section mb-5">
+        <label for="contact_info" class="form-label fw-semibold">Контактная информация</label>
+        <input type="text" class="form-control" id="contact_info" name="contact_info" value="{{ supplier.contact_info if supplier.contact_info }}" required>
+    </div>
+
+    <div class="form-section">
+        <h3 class="mb-3 fw-bold">Выберите товары для возврата</h3>
+        {% if available_items %}
+        <div class="table-responsive shadow-sm rounded">
+            <table class="table table-striped table-bordered align-middle mb-0" style="min-width: 700px;">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col" style="width: 60px; text-align: center;">Выбрать</th>
+                        <th scope="col">Название</th>
+                        <th scope="col">Артикул</th>
+                        <th scope="col" style="width: 100px;">Цена</th>
+                        <th scope="col" style="width: 80px;">Вес</th>
+                        <th scope="col" style="width: 90px;">Размер</th>
+                        <th scope="col" style="width: 120px;">Тип</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in available_items %}
+                    <tr>
+                        <td class="text-center">
+                            <input type="checkbox" name="selected_items" value="{{ item.item_id }}" class="form-check-input">
+                        </td>
+                        <td>{{ item.item_name }}</td>
+                        <td>{{ item.article_code }}</td>
+                        <td>{{ item.price }}</td>
+                        <td>{{ item.weight }}</td>
+                        <td>{{ item.size }}</td>
+                        <td>{{ item.item_type }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info my-3">
+            Нет товаров, доступных для возврата.
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="form-actions mt-4 d-flex gap-3">
+        <button type="submit" class="btn btn-primary" {% if not available_items %}disabled{% endif %}>
+            Создать возвратную поставку
+        </button>
+        <a href="{{ url_for('supplier.supplier_outbound') }}" class="btn btn-outline-secondary">
+            Отмена
+        </a>
+    </div>
+</form>
+
+<style>
+/* Цвета для переменных — если не заданы, можно задать здесь */
+:root {
+    --primary-color: #0d6efd;
+    --primary-color-rgb: 13, 110, 253;
+    --card-color: #fff;
+    --input-border: #ced4da;
+}
+
+.panel-header a.btn {
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.form-label {
+    font-size: 1rem;
+}
+
+.table {
+    border-collapse: separate;
+    border-spacing: 0 8px;
+}
+
+.table thead th {
+    font-weight: 600;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.table tbody tr {
+    background-color: #f9f9f9;
+    transition: background-color 0.2s ease;
+    border-radius: 8px;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(var(--primary-color-rgb), 0.1);
+}
+
+.table td, .table th {
+    vertical-align: middle;
+    padding: 0.75rem 1rem;
+}
+
+input.form-check-input {
+    width: 1.2em;
+    height: 1.2em;
+    cursor: pointer;
+}
+
+.card {
+    background-color: var(--card-color);
+    border-radius: 12px;
+    border: 1px solid var(--input-border);
+}
+
+.form-actions button,
+.form-actions a {
+    min-width: 160px;
+    font-weight: 600;
+    padding: 0.5rem 1.2rem;
+    font-size: 1rem;
+}
+
+.form-actions {
+    justify-content: flex-start;
+}
+
+@media (max-width: 767px) {
+    .table-responsive {
+        overflow-x: auto;
+    }
+    .form-actions {
+        flex-direction: column;
+        gap: 12px;
+    }
+    .form-actions button,
+    .form-actions a {
+        width: 100%;
+    }
+}
+</style>
+
+{% endblock %}

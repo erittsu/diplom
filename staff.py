@@ -161,7 +161,7 @@ def receive_delivery(delivery_id):
                 UPDATE Deliveries 
                 SET item_list = ?
                 WHERE delivery_id = ?
-            """, (json.dumps(remaining_items), delivery_id))
+            """, (json.dumps(remaining_items, ensure_ascii=False), delivery_id))
         
         conn.commit()
         
@@ -249,7 +249,7 @@ def return_item(item_id):
             VALUES (?, 'returned', ?, ?)
         """, (
             f"Return to supplier {supplier_id}",
-            json.dumps([{"item_id": item_id}]),
+            json.dumps([{"item_id": item_id}], ensure_ascii=False),
             session['user_id']
         ))
         
@@ -603,6 +603,159 @@ def staff_outbound():
         outbounds=outbounds,
         status_filter=status_filter
     )
+
+@staff_bp.route('/outbound/<int:outbound_id>')
+def staff_outbound_details(outbound_id):
+    if 'user_id' not in session or session.get('role') != 'staff':
+        return redirect('/login')
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Get outbound delivery details
+    cursor.execute("""
+        SELECT 
+            outbound_id, 
+            destination_address, 
+            FORMAT(delivery_date, 'dd.MM.yyyy') as delivery_date, 
+            status, 
+            item_list as items_json,
+            recipient_type,
+            recipient_name,
+            contact_info
+        FROM Outbound_Deliveries
+        WHERE outbound_id = ?
+    """, (outbound_id,))
+    
+    row = cursor.fetchone()
+    if not row:
+        conn.close()
+        return render_template('staff/staff_outbound_details.html', 
+                            error='Возвратная поставка не найдена',
+                            outbound=None)
+
+    # Process outbound data
+    columns = [column[0] for column in cursor.description]
+    outbound = dict(zip(columns, row))
+    
+    try:
+        items = json.loads(outbound['items_json'])
+        if not isinstance(items, list):
+            items = []
+    except:
+        items = []
+    
+    # Get full item details for each item in the outbound
+    detailed_items = []
+    for item in items:
+        if 'item_id' in item:
+            cursor.execute("""
+                SELECT I.item_id, I.item_name, I.article_code, I.price, 
+                    I.weight, I.size, I.item_type, I.supplier_id,
+                    S.supplier_name, L.location_name
+                FROM Items I
+                LEFT JOIN Suppliers S ON I.supplier_id = S.supplier_id
+                LEFT JOIN Item_Locations IL ON I.item_id = IL.item_id
+                LEFT JOIN Locations L ON IL.location_id = L.location_id
+                WHERE I.item_id = ?
+            """, (item['item_id'],))
+            
+            item_row = cursor.fetchone()
+            if item_row:
+                item_columns = [column[0] for column in cursor.description]
+                item_details = dict(zip(item_columns, item_row))
+                detailed_items.append(item_details)
+
+    # Ensure items is always a list
+    outbound['items'] = detailed_items
+    outbound['items_count'] = len(detailed_items)
+    
+    conn.close()
+    
+    return render_template(
+        'staff/staff_outbound_details.html',
+        outbound=outbound,
+        error=None
+    )
+
+@staff_bp.route('/outbound/<int:outbound_id>/ship', methods=['POST'])
+def ship_outbound(outbound_id):
+    if 'user_id' not in session or session.get('role') != 'staff':
+        return redirect('/login')
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Get outbound items
+        cursor.execute("""
+            SELECT item_list FROM Outbound_Deliveries 
+            WHERE outbound_id = ? AND status = 'preparing'
+        """, (outbound_id,))
+        row = cursor.fetchone()
+        if not row:
+            conn.close()
+            return "Outbound delivery not found or already processed", 404
+
+        items = json.loads(row.item_list)
+        
+        # Update status of each item to 'shipped'
+        for item in items:
+            if 'item_id' in item:
+                cursor.execute("""
+                    UPDATE Items SET status = 'shipped'
+                    WHERE item_id = ?
+                """, (item['item_id'],))
+                
+                # Log the transaction
+                cursor.execute("""
+                    INSERT INTO Inventory_Transactions 
+                    (user_id, item_id, transaction_type)
+                    VALUES (?, ?, 'ship')
+                """, (session['user_id'], item['item_id']))
+        
+        # Update outbound status
+        cursor.execute("""
+            UPDATE Outbound_Deliveries 
+            SET status = 'shipped'
+            WHERE outbound_id = ?
+        """, (outbound_id,))
+        
+        conn.commit()
+        
+    except Exception as e:
+        conn.rollback()
+        return f"Error shipping outbound: {str(e)}", 500
+    finally:
+        conn.close()
+
+    return redirect(url_for('staff.staff_outbound_details', outbound_id=outbound_id))
+
+@staff_bp.route('/outbound/<int:outbound_id>/cancel', methods=['POST'])
+def cancel_outbound(outbound_id):
+    if 'user_id' not in session or session.get('role') != 'staff':
+        return redirect('/login')
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Update outbound status to cancelled
+        cursor.execute("""
+            UPDATE Outbound_Deliveries 
+            SET status = 'cancelled'
+            WHERE outbound_id = ? AND status = 'preparing'
+        """, (outbound_id,))
+        
+        conn.commit()
+        
+    except Exception as e:
+        conn.rollback()
+        return f"Error cancelling outbound: {str(e)}", 500
+    finally:
+        conn.close()
+
+    return redirect(url_for('staff.staff_outbound_details', outbound_id=outbound_id))
 
 @staff_bp.route('/inventory')
 def staff_inventory():
