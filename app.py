@@ -17,7 +17,7 @@ app.register_blueprint(supplier_bp, url_prefix='/supplier')
 def get_db_connection():
     return pyodbc.connect(
         r'DRIVER={ODBC Driver 17 for SQL Server};'
-        r'SERVER=localhost\SQLEXPRESS;'
+        r'Server=WIN-EPU1AR2HMUO;'
         r'DATABASE=warehouse;'
         r'UID=flask_user;'
         r'PWD=elich3258;'
